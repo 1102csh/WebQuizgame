@@ -3,9 +3,9 @@ const mysql = require("mysql2");
 // 데이터베이스 연결 설정
 const db = mysql.createPool({
     host: "localhost",
-    user: "QuizPlayer",
-    password: "jC^!5wsZb#*c",
-    database: "quizgame",
+    user: "",
+    password: "",
+    database: "",
     waitForConnections: true,
     connectionLimit: 10, // 동시에 연결 가능한 최대 수
     queueLimit: 0,
