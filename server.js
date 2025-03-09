@@ -15,9 +15,9 @@ wss.on("connection", (ws) => {
 
     // 플레이어에게 닉네임 요청 (임시로 "Player" + 숫자로 지정)
     const playerName = "Player" + Math.floor(Math.random() * 1000);
-    game.players.set(playerName, ws);
+    game.addPlayer(playerName, ws);
 
-    /*
+    
     // 새로운 문제 출제
     game.startNewQuestion((quizData) => {
         wss.clients.forEach((client) => {
@@ -26,7 +26,7 @@ wss.on("connection", (ws) => {
             }
         });
     });
-    */
+    
    
     ws.on("message", (message) => {
         try {
@@ -60,7 +60,7 @@ wss.on("connection", (ws) => {
 
     ws.on("close", () => {
         console.log(`${playerName} 퇴장`);
-        game.players.delete(playerName);
+        game.removePlayer(playerName);
     });
 });
 
