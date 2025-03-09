@@ -2,7 +2,7 @@ const mysql = require("mysql2");
 
 // 데이터베이스 연결 설정
 const db = mysql.createPool({
-    host: "localhost",
+    host: "",
     user: "",
     password: "",
     database: "",
@@ -14,11 +14,11 @@ const db = mysql.createPool({
 // 랜덤 퀴즈 문제 가져오는 함수
 function getRandomQuiz(callback) {
     const query = `
-        SELECT q.id, q.question, q.genre, q.hint, a.answer 
-        FROM quizzes q 
-        JOIN quiz_answers a ON q.id = a.quiz_id 
-        ORDER BY RAND() 
-        LIMIT 1;
+    SELECT q.id, q.question, q.genre, q.hint, q.hint2, a.answer 
+    FROM quizzes q 
+    JOIN quiz_answers a ON q.id = a.quiz_id 
+    ORDER BY RAND() 
+    LIMIT 1;
     `;
 
     db.query(query, (err, results) => {
