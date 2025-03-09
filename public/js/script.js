@@ -13,7 +13,7 @@ ws.onmessage = (event) => {
         addMessageToChat(`${data.sender}: ${data.data}`,"guest");
     } 
     else if (data.type === "playerList") {
-        updatePlayerList(data.players);
+        updatePlayerList(data.players, data.scores);
     } 
     else if (data.type === "newQuestion") {
         document.getElementById("genre").innerText = "주제 : " + data.genre;
@@ -74,13 +74,14 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
 });
 
 // 플레이어 목록 업데이트
-function updatePlayerList(players) {
+function updatePlayerList(players, scores) {
     const playerListElement = document.getElementById("playerList");
-    playerListElement.innerHTML = ""; // 기존 목록 초기화
+    playerListElement.innerHTML = "";
 
-    players.forEach(player => {
+    players.forEach((player) => {
         const li = document.createElement("li");
-        li.textContent = player;
+        li.classList.add("playerscore");
+        li.textContent = `${player} ${scores[player]}`;
         playerListElement.appendChild(li);
     });
 }
