@@ -16,3 +16,7 @@ UI는 임의로 설정
 방 만들기 버튼을 누르면 화면 중앙에 방 만들기 설정을 할 수 있는 modal 출력<br>
 클라이언트에서 서버에 방에 관한 정보를 전송<br>
 ![image](https://github.com/user-attachments/assets/e1a64913-0fed-4382-bb5f-1f782bb6aa84)<br>
+<br>
+방 개설 이후 방을 개설한 방장(플레이어)는 해당 방에 입장해야함<br>
+![image](https://github.com/user-attachments/assets/2530d6e0-13fe-4734-a533-003f05464a64)<br>
+game.html 파일로 이동하며 방 번호를 전송함
