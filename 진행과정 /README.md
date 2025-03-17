@@ -9,7 +9,7 @@ UI는 임의로 설정
 
 ## 2025. 03. 17
 작업 진행 중<br>
-![image](https://github.com/user-attachments/assets/98a991b2-25a1-42b0-848b-c686e17bcbf1)<br>
+![image](https://github.com/user-attachments/assets/05bcd760-c317-41c3-bfbe-15ff05664595)<br>
 임시 UI를 입힌 후 메인 화면이 될 로비를 제작중<br>
 <br>
 ![image](https://github.com/user-attachments/assets/899834f4-1d39-48ca-b04d-8be5fa94aeda)<br>
