@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 퀴즈 게임 - 대기 화면</title>
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><span style="color:#006A79">Q</span>zone</div>
+        </header>
+
+        <!-- 방 만들기 모달 -->
+        <div id="roomModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>방 만들기</h2>
+                <label>방 이름: <input type="text" id="roomNameInput"></label>
+                <button id="createRoomBtn">방 만들기</button>
+            </div>
+        </div>
+
+        <div class="contentWrap">
+            <div class="controls">
+                <span class="btn" id="createRoom" onclick="createRoom()">방 만들기</span>
+                <span class="btn" id="joinRoom">빠른 입장</span>
+            </div>
+            <div class="lobby">
+                <div id="roomList"></div>
+                <div class="pagination">
+                    <button id="prev-page">◀ 이전</button>
+                    <span id="page-info">1 / 1</span>
+                    <button id="next-page">다음 ▶</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<script src="script.js"></script>-->
+    <script>
+        document.getElementById("createRoom").addEventListener("click", function () {
+            document.getElementById("roomModal").style.display = "block";
+        });
+
+        document.querySelector(".close").addEventListener("click", function () {
+            document.getElementById("roomModal").style.display = "none";
+        });
+
+        // 모달 바깥 클릭 시 닫기
+        window.addEventListener("click", function (event) {
+            if (event.target.id === "roomModal") {
+                document.getElementById("roomModal").style.display = "none";
+            }
+        });
+    </script>
+    <script src="/js/lobby.js"></script>
+</body>
+
+</html>
