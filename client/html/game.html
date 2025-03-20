@@ -4,64 +4,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 게임</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
+    <title>Qzone</title>
 
-        #game-container {
-            max-width: 600px;
-            margin: auto;
-        }
+    <link href="../css/style.css" rel="stylesheet">
+    <link href="../css/messages.css" rel="stylesheet">
 
-        #chat-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 200px;
-            overflow-y: scroll;
-        }
-
-        #scoreboard {
-            border: 1px solid #000;
-            padding: 10px;
-            margin-top: 10px;
-        }
-
-        #question-box {
-            font-size: 20px;
-            margin-top: 20px;
-            font-weight: bold;
-        }
-    </style>
     <script src="../js/socket.js" type="module"></script>
     <script src="../js/game.js" type="module"></script>
 </head>
 
 <body>
-    <h1>실시간 퀴즈 게임</h1>
+    <div class="logo"><span style="color:#006A79">Q</span>zone</div>
 
-    <h1 id="room-title">방 제목 로딩 중...</h1>
-    <h2 id="room-number">방 번호 로딩 중...</h2>
-
-    <h3>참여자 목록</h3>
-    <ul id="player-list"></ul>
-
-    <div id="game-container">
-        <button onclick="startGame()">게임 시작</button>
-
-        <div id="question-box">문제가 여기에 표시됩니다.</div>
-
-        <input type="text" id="answer-input" placeholder="정답 입력">
-        <button onclick="sendAnswer()">제출</button>
-
-        <div id="chat-box"></div>
-
-        <div id="scoreboard">
-            <h3>점수판</h3>
-            <ul id="score-list"></ul>
+    <section>
+        <div class="ad">
+            <img src="../assets/temp.webp" alt="광고 배너">
         </div>
-    </div>
+        <div class="ContentWrap">
+            <div class="roomInfoWrap">
+                <div class="roomInfo" id="roomInfo">
+                    <span id="roomNumber">방 번호 로딩 중...</span>
+                    <span id="roomTitle">방 제목 로딩 중...</span>
+                </div>
+            </div>
+
+            <div class="questionWrap">
+                <span class="timerWrap"><span id="timer"></span></span>
+
+                <div class="playerWrap">
+                    <div style="font-size: 22px;" id="playerListLabel">플레이어</div>
+                    <ul id="playerList"></ul>
+                </div>
+
+                <span id="genre"> 장르 </span>
+                <span id="question"> 문제 </span>
+
+                <span class="hint"> 힌트1 : <span id="hint1">n초 후에 공개됩니다.</span></span>
+                <span class="hint"> 힌트2 : <span id="hint2">n초 후에 공개됩니다.</span></span>
+            </div>
+
+            <div class="chatBoxWrap">
+                <div id="chatBox">
+                    <ul id="messages"></ul>
+                </div>
+        
+                <span class="msgInputWrap">
+                    <input type="text" id="answerInput" placeholder="이곳에 입력하세요">
+                    <button class="msgInputBtn" onclick="sendAnswer()">전송</button>
+                </span>
+            </div>
+        </div>
+        <div class="ad">
+            <img src="../assets/temp2.jpg" alt="광고 배너">
+        </div>
+    </section>
 </body>
+
 </html>
