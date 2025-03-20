@@ -27,5 +27,5 @@ game.html 파일로 이동하며 방 번호를 전송함
 이 과정에서 route, api 등을 통해 모듈화를 하는 방법을 알게되었다.
 
 ## 2025. 03. 20
-![image](https://github.com/user-attachments/assets/f5d97970-db77-47e9-9c26-62229092afe8)<br>
+![image](https://github.com/user-attachments/assets/3744d69f-c846-4cef-90ff-f0d874f64fb2)<br>
 기능 개선 및 UI 개선
