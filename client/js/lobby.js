@@ -25,11 +25,13 @@ function displayRooms(rooms) {
 
     rooms.forEach((room) => {
         const roomElement = document.createElement("div");
-        roomElement.classList.add("room-item");
+        roomElement.classList.add("rooms");
         roomElement.innerHTML = `
-            <span>${room.roomNumber}. ${room.title} (${room.currentPlayers}/${room.maxPlayers})</span>
-            <button onclick="joinRoom('${room.roomId}')">입장</button>
+            <span class='roomId'>${String(room.roomNumber).padStart(3, '0')}</span>
+            <span class='roomName'>${room.title}</span>
+            <span class='roomPlayers'>(${room.currentPlayers}/${room.maxPlayers})</span>
         `;
+        roomElement.addEventListener("click", ()=>joinRoom(room.roomId));
         roomList.appendChild(roomElement);
     });
 }
