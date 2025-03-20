@@ -6,7 +6,7 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const gameRoutes = require("./routes/gameRoutes");
-const setupWebSocket = require("./socket");
+const setupWebSocket = require("./server");
 
 const app = express();
 const server = http.createServer(app); // HTTP 서버 생성
