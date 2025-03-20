@@ -25,3 +25,7 @@ game.html 파일로 이동하며 방 번호를 전송함
 ## 2025. 03. 18
 뜻대로 잘 풀리지 않아 우선 GPT를 통해 제작 후 단계 별로 따라가며 다시 만들어 볼 계획이다.<br>
 이 과정에서 route, api 등을 통해 모듈화를 하는 방법을 알게되었다.
+
+## 2025. 03. 20
+![image](https://github.com/user-attachments/assets/f5d97970-db77-47e9-9c26-62229092afe8)<br>
+기능 개선 및 UI 개선
