@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'DownloadFont';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/omyu_pretty.woff2') format('woff2');
-    font-weight: normal;
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+    font-weight: 400;
     font-style: normal;
 }
 
@@ -13,7 +13,6 @@ body {
 }
 
 header { 
-    border: 1px solid black;
     height: 20vh;
 }
 .logo {
@@ -59,10 +58,6 @@ button {
     color: white;
 }
 
-button:hover {
-
-}
-
 .contentWrap {
     padding: 10px;
 }
@@ -79,7 +74,6 @@ button:hover {
     gap: 4px; /* 요소 간 간격 */
     justify-content: flex-start; /* 가운데 정렬 */
 }
-
 .rooms {
     display: flex;
     flex-direction: row;
@@ -114,9 +108,6 @@ button:hover {
     text-align: center;
 }
 
-.pagination button {
-
-}
 .modal {
     display: none; /* 기본적으로 숨김 */
     position: fixed;
