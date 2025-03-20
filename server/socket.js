@@ -161,9 +161,8 @@ function handleDisconnect(ws) {
 
     let roomId = null;
 
-    // 플레이어가 속한 방을 찾기
     for (const [id, room] of Object.entries(gameRooms)) {
-        if (room.players.includes(userId)) {
+        if (room.players.has(userId)) { // ✅ Set 사용
             roomId = id;
             break;
         }
@@ -171,44 +170,35 @@ function handleDisconnect(ws) {
 
     if (!roomId) return;
 
-    // 방에서 플레이어 제거
-    gameRooms[roomId].players = gameRooms[roomId].players.filter((id) => id !== userId);
+    gameRooms[roomId].players.delete(userId);
 
-    // 모든 플레이어가 나가면 방 삭제
-    if (gameRooms[roomId].players.length === 0) {
+    if (gameRooms[roomId].players.size === 0) {
         delete gameRooms[roomId];
     }
 
-    // WebSocket 클라이언트 목록에서 삭제
     delete clients[userId];
 
-    // 남은 플레이어에게 알림
-    broadcast(roomId, {
-        type: "userLeft",
-        userId,
-        message: `${userId}님이 퇴장했습니다.`,
-    });
+    // ✅ 모든 플레이어에게 업데이트 전송
+    updatePlayerList(roomId);
 
-    console.log(`사용자 ${userId} 연결 종료 (방 ID: ${roomId})`);
+    console.log(`🚪 사용자 ${userId} 연결 종료 (방 ID: ${roomId})`);
 }
 
 // ✅ 플레이어가 방에 입장할 때 처리
 function handleJoin(ws, data) {
     const { roomId, userId } = data;
 
-    if (!gameRooms[roomId]) {
-        ws.send(JSON.stringify({ type: "error", message: "방을 찾을 수 없습니다." }));
-        return;
-    }
+    if (!gameRooms[roomId]) return ws.send(JSON.stringify({ type: "error", message: "방을 찾을 수 없습니다." }));
 
-    // ✅ Set을 사용하여 중복 방지
     gameRooms[roomId].players.add(userId);
-
     clients[userId] = ws;
 
-    // 모든 플레이어에게 방 정보 갱신 전송
+    console.log(`✅ ${userId}가 ${roomId} 방에 입장함.`);
+
+    // ✅ 참여자 목록을 갱신하여 모든 사람에게 전송
     updatePlayerList(roomId);
 }
+
 // ✅ 플레이어가 방에서 나갈 때 처리
 function handleLeave(ws, data) {
     const { roomId, userId } = data;
@@ -228,54 +218,20 @@ function handleLeave(ws, data) {
     updatePlayerList(roomId);
 }
 
-// ✅ WebSocket 연결이 종료될 때 자동 퇴장 처리
-function handleDisconnect(ws) {
-    const userId = Object.keys(clients).find((key) => clients[key] === ws);
-    if (!userId) return;
-
-    let roomId = null;
-
-    // 사용자가 속한 방 찾기
-    for (const [id, room] of Object.entries(gameRooms)) {
-        if (room.players.has(userId)) { // ✅ Set에는 has() 사용
-            roomId = id;
-            break;
-        }
-    }
-
-    if (!roomId) return;
-
-    // ✅ 방에서 플레이어 제거
-    gameRooms[roomId].players.delete(userId);
-
-    // ✅ 방이 비어 있으면 삭제
-    if (gameRooms[roomId].players.size === 0) {
-        delete gameRooms[roomId];
-    }
-
-    delete clients[userId];
-
-    // ✅ 모든 플레이어에게 방 정보 갱신 전송
-    updatePlayerList(roomId);
-}
-
 // ✅ 모든 클라이언트에게 방 참여자 목록 업데이트 전송
 function updatePlayerList(roomId) {
     if (!gameRooms[roomId]) return;
 
-    // ✅ Set을 배열로 변환하여 전송
-    const playerList = [...gameRooms[roomId].players].map((playerId) => ({
+    const playerList = Array.from(gameRooms[roomId].players).map((playerId) => ({
         userId: playerId,
         score: gameRooms[roomId].scoreboard ? gameRooms[roomId].scoreboard[playerId] || 0 : 0,
     }));
 
-    gameRooms[roomId].players.forEach((playerId) => {
-        if (clients[playerId]) {
-            clients[playerId].send(JSON.stringify({
-                type: "updatePlayers",
-                players: playerList,
-            }));
-        }
+    console.log(`📤 ${roomId} 방의 새로운 참여자 목록:`, playerList);
+
+    broadcast(roomId, {
+        type: "updatePlayers",
+        players: playerList,
     });
 }
 
