@@ -10,7 +10,6 @@ function setupWebSocket(server) {
     console.log("새로운 WebSocket 연결이 수립되었습니다.");
 
     ws.on("message", (message) => {
-      console.log("새로운 데이터 수신 : ",message);
       const data = JSON.parse(message);
 
       switch (data.type) {
@@ -27,7 +26,7 @@ function setupWebSocket(server) {
           handleGameStart(data);
           break;
         case "answer":
-          console.log("수신");
+          handleAnswer(ws, data);
           break;
       }
     });
@@ -42,19 +41,22 @@ function setupWebSocket(server) {
 function handleJoin(ws, data) {
   const { roomId, userId, username } = data;
 
-  if (!gameRooms[roomId]) {
-    ws.send(JSON.stringify({ type: "error", message: "방을 찾을 수 없습니다." }));
-    return;
-  }
+  if (!gameRooms[roomId]) return ws.send(JSON.stringify({ type: "error", message: "방을 찾을 수 없습니다." }));
 
-  gameRooms[roomId].players.push(userId);
+  // ✅ 중복 방지를 위해 Set을 사용
+  gameRooms[roomId].players.add(userId);
   clients[userId] = ws;
 
+  console.log(`✅ ${userId}가 ${roomId} 방에 입장함.`); // 디버깅 로그 추가
+
+  // ✅ 참여자 목록을 갱신하여 모든 사람에게 전달
+  broadcastPlayerList(roomId);
+
+  // ✅ 채팅창에 입장 메시지 출력
   broadcast(roomId, {
-    type: "userJoined",
-    userId,
-    username,
-    message: `${username}님이 입장했습니다.`,
+    type: "chat",
+    userId: "SYSTEM",
+    message: `${username || userId}님이 입장하셨습니다.`,
   });
 }
 
@@ -63,19 +65,24 @@ function handleLeave(ws, data) {
 
   if (!gameRooms[roomId]) return;
 
-  gameRooms[roomId].players = gameRooms[roomId].players.filter((id) => id !== userId);
+  gameRooms[roomId].players.delete(userId);
 
-  if (gameRooms[roomId].players.length === 0) {
+  if (gameRooms[roomId].players.size === 0) {
     delete gameRooms[roomId]; // 모든 플레이어가 나가면 방 삭제
   }
 
   delete clients[userId];
 
+  console.log(`🚪 ${userId}가 ${roomId} 방에서 나감.`); // 디버깅 로그 추가
+
+  // ✅ 남아있는 플레이어 목록을 업데이트
+  broadcastPlayerList(roomId);
+
+  // ✅ 채팅창에 퇴장 메시지 출력
   broadcast(roomId, {
-    type: "userLeft",
-    userId,
-    username,
-    message: `${username}님이 퇴장했습니다.`,
+    type: "chat",
+    userId: "SYSTEM",
+    message: `${username || userId}님이 퇴장하셨습니다.`,
   });
 }
 
@@ -100,6 +107,21 @@ function handleGameStart(data) {
   });
 }
 
+function handleAnswer(ws, data) {
+  const { roomId, userId, message } = data;
+
+  if (!gameRooms[roomId]) return;
+  if (!message || message.trim() === "") return; // 빈 메시지 방지
+
+  console.log(`✅ 정답 메시지 수신 - ${userId}: ${message}`);
+
+  broadcast(roomId, {
+    type: "answer",
+    userId,
+    message,
+  });
+}
+
 function handleDisconnect(ws) {
   const userId = Object.keys(clients).find((key) => clients[key] === ws);
   if (userId) {
@@ -107,12 +129,31 @@ function handleDisconnect(ws) {
   }
 }
 
+function broadcastPlayerList(roomId) {
+  if (!gameRooms[roomId]) return;
+
+  const playerList = [...gameRooms[roomId].players].map((playerId) => ({
+    userId: playerId,
+    score: gameRooms[roomId].scoreboard ? gameRooms[roomId].scoreboard[playerId] || 0 : 0,
+  }));
+
+  console.log(`📤 ${roomId} 방의 새로운 플레이어 목록 전송:`, playerList); // 디버깅 로그 추가
+
+  broadcast(roomId, {
+    type: "updatePlayers",
+    players: playerList,
+  });
+}
+
 function broadcast(roomId, message) {
   if (!gameRooms[roomId]) return;
 
   gameRooms[roomId].players.forEach((playerId) => {
-    if (clients[playerId]) {
-      clients[playerId].send(JSON.stringify(message));
+    const client = clients[playerId];
+    if (client && client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(message));
+    } else {
+      console.warn(`⚠️ 서버가 닫혀 있어 ${playerId}에게 메시지를 전송하지 못함.`);
     }
   });
 }
