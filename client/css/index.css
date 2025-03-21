@@ -1,3 +1,4 @@
+/* ✅ 기본 폰트 및 전체 설정 */
 @font-face {
     font-family: 'DownloadFont';
     src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
@@ -5,130 +6,347 @@
     font-style: normal;
 }
 
+:root {
+    --primary-color: #3E4C95;
+    --primary-color-hover: #2c3870;
+    --primary-color-dark: #3E4C95;
+    --primary-color-dark-hover: #2c3870;
+    --text-color-dark: #f0f0f0;
+    --bg-color-dark: #1e1e1e;
+    --card-bg-dark: #2a2a2a;
+    --input-bg-dark: #3a3a3a;
+    --border-dark: #444;
+    --gray-light: #f4f4f4;
+    --gray-dark: #bbb;
+}
+
 body {
     font-family: 'DownloadFont', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: var(--gray-light);
+    color: #333;
 }
 
-header { 
-    height: 20vh;
+/* ✅ 헤더 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
 }
+
 .logo {
-    margin: 10px;
-    padding: 10px 0;
-    font-size: 40px;
+    font-size: 32px;
     font-weight: bold;
 }
 
-.controls {
-    position: relative;
-    display: flex;;
-    justify-content: flex-end;
-    align-items: center;
-
-    padding-left: 10px;
-    padding-right: 10px;
-    width: 60vw;
+.logo-highlight {
+    color: var(--primary-color);
 }
-.lobbyText {
+
+/* ✅ 프로필 */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    cursor: pointer;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid black;
+}
+
+.username {
+    font-weight: 500;
+}
+
+.settings-menu {
     position: absolute;
-    font-size: 25px;
-    left: 0;
+    top: 50px;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.settings-menu button {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+}
+
+.settings-menu button:hover {
+    background-color: #f0f0f0;
+}
+
+/* ✅ 컨트롤 버튼 */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px 0;
 }
 
 .btn {
-    font-size: 25px;
-    background-color: #006A79;
-    color:white;
-    padding: 15px;
-
-    cursor: pointer;
-}
-.btn:hover {
-    background-color: #015c68;
-}
-button {
+    background-color: var(--primary-color);
+    color: #fff;
     border: none;
-    font-size: 20px;
-    font-family: 'DonwloadFont', sans-serif;
-
-    background-color: #006A79;
-    color: white;
-}
-
-.contentWrap {
-    padding: 10px;
-}
-.lobby {
-    width: 60vw;
-    height: 68vh;
-
-    background-color: #e4e4e4;
-    padding: 10px;
-}
-#roomList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px; /* 요소 간 간격 */
-    justify-content: flex-start; /* 가운데 정렬 */
-}
-.rooms {
-    display: flex;
-    flex-direction: row;
-    width: calc(50% - 4px); /* 한 줄에 두 개 배치 */
-    height: 10vh;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    text-align: center;
-    background-color: #f9f9f9;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 12px 24px;
+    font-size: 18px;
+    border-radius: 5px;
     cursor: pointer;
 }
-.rooms:hover{
-    background-color: #d6d6d6;
-}
-.roomId {
-    border-right: 1px solid lightgray;
-    width: 15%;
-    font-size: 28px;
-}
-.roomName {
-    width: 70%;
-    font-size: 22px;
-}
-.roomPlayers {
-    width: 15%;
-    font-size: 22px;
+
+.btn:hover {
+    background-color: var(--primary-color-hover);
 }
 
+/* ✅ 방 목록 */
+.room-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 0 40px;
+    min-height: 60vh;
+}
+
+.room-card {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.room-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.room-meta {
+    font-size: 14px;
+    color: #666;
+}
+
+.lock-icon {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 18px;
+    color: #888;
+}
+
+.room-players {
+    position: absolute;
+    top: 15px;
+    right: 50px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* ✅ 페이지 네비게이션 */
 .pagination {
-    display: none;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
 }
 
+.pagination button {
+    background-color: transparent;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination button:hover {
+    background-color: var(--primary-color-hover);
+}
+
+/* ✅ 모달 */
 .modal {
-    display: none; /* 기본적으로 숨김 */
     position: fixed;
-    z-index: 1000;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 300px;
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
 }
 
 .modal-content {
-    text-align: center;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.close {
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content label {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    text-align: left;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="password"],
+.modal-content input[type="number"] {
+    margin-top: 5px;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.modal-content .genre-options,
+.modal-content .timer-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.modal-content .genre-options label,
+.modal-content .timer-options label {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+.modal-content .close {
     position: absolute;
     top: 10px;
-    right: 10px;
+    right: 15px;
+    font-size: 24px;
+    background: none;
+    border: none;
     cursor: pointer;
+    padding: 3px;
+}
+
+.modal-content button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.modal-content button:hover {
+    background-color: var(--primary-color-hover);
+}
+
+.modal-content .close:hover {
+    background-color: transparent;
+}
+
+/* ✅ 다크 모드 */
+body.dark-mode {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+}
+
+body.dark-mode .header,
+body.dark-mode .modal-content,
+body.dark-mode .room-card,
+body.dark-mode .settings-menu {
+    background-color: var(--card-bg-dark);
+    color: var(--text-color-dark);
+    border-color: var(--border-dark);
+}
+
+body.dark-mode .logo-highlight {
+    color: var(--primary-color);
+}
+
+body.dark-mode .btn,
+body.dark-mode .pagination button,
+body.dark-mode .modal-content button {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+body.dark-mode .modal-content .close {
+    background-color: transparent;
+}
+
+body.dark-mode .btn:hover,
+body.dark-mode .pagination button:hover,
+body.dark-mode .modal-content button:hover {
+    background-color: var(--primary-color-hover);
+}
+body.dark-mode .modal-content .close:hover {
+    background-color: transparent;
+}
+
+body.dark-mode .room-meta,
+body.dark-mode .room-players,
+body.dark-mode .lock-icon {
+    color: var(--gray-dark);
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode label {
+    color: var(--text-color-dark);
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="number"] {
+    background-color: var(--input-bg-dark);
+    color: #fff;
+    border: 1px solid #555;
+}
+
+body.dark-mode input::placeholder {
+    color: #aaa;
+}
+
+body.dark-mode input[type="checkbox"],
+body.dark-mode input[type="radio"] {
+    accent-color: #3E4C95;
 }
