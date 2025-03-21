@@ -1,0 +1,97 @@
+body.dark-mode {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+body.dark-mode .logo {
+    color: #ffffff;
+}
+body.dark-mode .logo-highlight {
+    color: #7388ff; /* 기존의 #3E4C95보다 살짝 밝게 조정 */
+}
+
+body.dark-mode .roomInfo {
+    background-color: #2b2b2b;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-mode #roomNumber {
+    color: #aaaaaa;
+}
+
+body.dark-mode .playerscore:nth-child(odd) {
+    background-color: #2a2a2a;
+}
+
+body.dark-mode .playerscore:nth-child(even) {
+    background-color: #1f1f1f;
+}
+
+body.dark-mode .questionWrap {
+    background-color: #2b2b2b;
+    border-color: #444;
+    color: #eaeaea;
+}
+
+body.dark-mode #genre {
+    color: #bbbbbb;
+}
+
+body.dark-mode .timerWrap {
+    background-color: #333333;
+}
+
+body.dark-mode .ad {
+    background-color: #2c2c2c;
+    color: #ffffff;
+    box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+}
+/* 채팅 박스 영역 */
+body.dark-mode #chatBox {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+    border-top: 1px solid #444;
+    border-left: 1px solid #444;
+    border-right: 1px solid #444;
+}
+
+/* 스크롤바 스타일 */
+body.dark-mode #chatBox::-webkit-scrollbar-thumb {
+    background-color: #666;
+}
+body.dark-mode #chatBox::-webkit-scrollbar-track {
+    background-color: #333;
+}
+
+/* 메시지 목록 */
+body.dark-mode #messages li {
+    color: #e0e0e0;
+}
+
+/* 시스템 메시지 */
+body.dark-mode .systemMessage {
+    color: #888;
+}
+
+/* 입력창 */
+body.dark-mode #answerInput {
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border-left: 1px solid #555;
+    border-bottom: 1px solid #555;
+}
+
+/* 버튼 */
+body.dark-mode .msgInputBtn {
+    background-color: #3E4C95; /* 그대로 유지하거나 더 어둡게 조정 가능 */
+    color: #ffffff;
+}
+body.dark-mode .msgInputBtn:hover {
+    background-color: #5261b5; /* 기존보다 약간 밝은 톤 */
+}
+
+/* 포커스 스타일 */
+body.dark-mode input[type="text"]:focus {
+    border: 2px solid #888;
+}
