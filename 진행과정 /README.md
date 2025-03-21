@@ -29,3 +29,13 @@ game.html 파일로 이동하며 방 번호를 전송함
 ## 2025. 03. 20
 ![image](https://github.com/user-attachments/assets/ee7a8ff3-3366-4be4-8cb9-b268943080bf)<br>
 기능 개선 및 UI 개선
+
+## 2025. 03. 21
+![image](https://github.com/user-attachments/assets/4bf05760-530f-43f6-bf89-3c4c0039968f)<br>
+![image](https://github.com/user-attachments/assets/04fa6ab8-289b-4ef5-b169-cb0fdb01694d)<br>
+![image](https://github.com/user-attachments/assets/fa984079-e0af-4c63-ada3-e141ade71f26)<br>
+![image](https://github.com/user-attachments/assets/fbc2c173-65ed-46fc-879b-f4d43b4d7ba3)<br>
+
+코드 리팩토링 및 UI 개선 , 다크 모드 추가
+
+
