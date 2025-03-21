@@ -2,62 +2,96 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Qzone</title>
 
-    <link href="../css/style.css" rel="stylesheet">
-    <link href="../css/messages.css" rel="stylesheet">
+    <link href="../css/style.css" rel="stylesheet" />
+    <link href="../css/messages.css" rel="stylesheet" />
+    <link href="../css/dark.css" rel="stylesheet" />
 
     <script src="../js/socket.js" type="module"></script>
     <script src="../js/game.js" type="module"></script>
+    <script src="../js/utils.js"></script>
 </head>
 
 <body>
-    <div class="logo"><span style="color:#006A79">Q</span>zone</div>
-
-    <section>
-        <div class="ad">
-            <img src="../assets/temp.webp" alt="광고 배너">
+    <!-- 로고 영역 -->
+    <header>
+        <div id="logo" class="logo">
+            <span class="logo-highlight">Q</span>zone
         </div>
-        <div class="ContentWrap">
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <main>
+        <!-- 좌측 광고 또는 상단 광고 -->
+        <aside class="ad">
+            <img src="" alt="배너" />
+        </aside>
+
+        <!-- 게임 콘텐츠 영역 -->
+        <section class="ContentWrap">
+            <!-- 방 정보 -->
             <div class="roomInfoWrap">
-                <div class="roomInfo" id="roomInfo">
+                <div id="roomInfo" class="roomInfo">
                     <span id="roomNumber">방 번호 로딩 중...</span>
                     <span id="roomTitle">방 제목 로딩 중...</span>
                 </div>
             </div>
 
+            <!-- 문제 및 플레이어 정보 -->
             <div class="questionWrap">
                 <span class="timerWrap"><span id="timer"></span></span>
 
                 <div class="playerWrap">
-                    <div style="font-size: 22px;" id="playerListLabel">플레이어</div>
+                    <div id="playerListLabel" class="playerLabel">플레이어</div>
                     <ul id="playerList"></ul>
                 </div>
 
-                <span id="genre"> 장르 </span>
-                <span id="question"> 문제 </span>
+                <span id="genre">장르</span>
+                <span id="question">문제</span>
 
-                <span class="hint"> 힌트1 : <span id="hint1">n초 후에 공개됩니다.</span></span>
-                <span class="hint"> 힌트2 : <span id="hint2">n초 후에 공개됩니다.</span></span>
+                <span class="hint">힌트1 : <span id="hint1">n초 후에 공개됩니다.</span></span>
+                <span class="hint">힌트2 : <span id="hint2">n초 후에 공개됩니다.</span></span>
             </div>
 
+            <!-- 채팅 영역 -->
             <div class="chatBoxWrap">
                 <div id="chatBox">
                     <ul id="messages"></ul>
                 </div>
-        
-                <span class="msgInputWrap">
-                    <input type="text" id="answerInput" placeholder="이곳에 입력하세요">
+
+                <div class="msgInputWrap">
+                    <input type="text" id="answerInput" placeholder="이곳에 입력하세요" />
                     <button class="msgInputBtn" onclick="sendAnswer()">전송</button>
-                </span>
+                </div>
             </div>
-        </div>
-        <div class="ad">
-            <img src="../assets/temp2.jpg" alt="광고 배너">
-        </div>
-    </section>
+        </section>
+
+        <!-- 우측 또는 하단 광고 -->
+        <aside class="ad">
+            <img src="" alt="배너" />
+        </aside>
+    </main>
+
+    <!-- (선택사항) 푸터 -->
+    <footer>
+        <!-- 예: 저작권, 문의 링크 등 -->
+    </footer>
+
+    <script>
+        // 로고 클릭 시 로비로 이동
+        document.getElementById("logo").addEventListener("click", () => {
+            window.location.href = "/index.html";
+        });
+
+        // 다크 모드 전환 (사용자 설정에 따라 활용 가능)
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+        //toggleDarkMode();
+    </script>
 </body>
 
 </html>
