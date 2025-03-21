@@ -1,137 +1,48 @@
-* { 
-    padding: 0; 
+/* 공통 리셋 */
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+/* 기본 레이아웃 */
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
     background-color: #f1f1f1;
+    font-family: sans-serif;
+}
+
+/* ===== Header ===== */
+header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
 }
 
 .logo {
     font-size: 40px;
-    margin-right: 10px;
+    font-weight: bold;
     cursor: pointer;
 }
-.roomInfoWrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 4vh;
-    padding: 10px;
-}
-.roomInfo {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    background-color: white;
-    border: 1px solid lightgray;
-    padding-left: 10px;
-    font-size: 25px;
-}
-#roomNumber { 
-    color: darkgray;
-    margin-right: 10px;
-}
-.playerWrap {
-    position: absolute;
-    z-index: 10;
 
-    top: 70px;
-    left: 30px;
-
-    width: 140px;
-    height: 400px;
-
-    font-size: 16px;
-    overflow-x: hidden;
-}
-#playerList {
-    width: 100%;
-    margin-top: 10px;
-}
-.playerscore {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    height: 30px;
-
-    padding-left: 10px;
-}
-.playerscore:nth-child(odd) { background-color: #f1f1f1;}
-.playerscore:nth-child(even) { background-color: #eeeeee;}
-
-.ContentWrap {
-    position: relative;
-    width: 60vw;
-    height: 90vh;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    padding: 10px;
-}
-.questionWrap{
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-    width: 100%;
-    height: 100%;
-
-    color: black;
-    background-color: white;
-    border: 1px solid lightgray;
-}
-#genre {
-    font-size: 14px;
-    color: gray;
-}
-#question {
-    font-size: 32px;
-    margin-bottom: 15px;
-}
-.hint {
-    margin-top: 15px;
-    font-size: 24px;
+.logo-highlight {
+    color: #3E4C95;
 }
 
-.timerWrap {
-    position: absolute;
-    top: 0px;
-
-    display: flex;
-    
-    justify-content: center;
-    width: 90%;
-    height: 10px;
-
-    overflow: hidden;
-    background-color: lightgray;
-}
-#timer {
-    width: 100%;
-    height: 100%;
-
-    background-color: skyblue;
-
-    transition: all 1s linear;
-}
-
-section {
+/* ===== Main Layout ===== */
+main {
     display: flex;
     flex-direction: row;
 }
-.ad {
+
+/* ===== 광고 배너 ===== */
+aside.ad {
     width: 15vw;
     height: 80vh;
-    background: #ffffff; /* 그라디언트 배경 */
+    background: #ffffff;
     font-size: 24px;
     font-weight: bold;
     text-transform: uppercase;
@@ -144,9 +55,196 @@ section {
     cursor: pointer;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-/* ✅ 광고 배너 내부 이미지 스타일 */
+
 .ad img {
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain; /* 이미지 비율 유지하며 배너 크기에 맞춤 */
+    object-fit: contain;
+}
+
+/* ===== 콘텐츠 영역 ===== */
+.ContentWrap {
+    position: relative;
+    width: 60vw;
+    height: 90vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 10px;
+}
+
+/* 방 정보 */
+.roomInfoWrap {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 4vh;
+    padding-bottom: 10px;
+}
+
+.roomInfo {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: white;
+    border: 1px solid lightgray;
+    padding-left: 10px;
+    font-size: 25px;
+}
+
+#roomNumber {
+    color: darkgray;
+    margin-right: 10px;
+}
+
+/* 문제 및 플레이어 영역 */
+.questionWrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: 100%;
+
+    color: black;
+    background-color: white;
+    border: 1px solid lightgray;
+}
+
+.playerWrap {
+    position: absolute;
+    z-index: 10;
+    top: 70px;
+    left: 30px;
+
+    width: 140px;
+    height: 400px;
+
+    font-size: 16px;
+    overflow-x: hidden;
+}
+
+#playerList {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.playerscore {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    padding-left: 10px;
+}
+
+.playerscore:nth-child(odd) {
+    background-color: #f1f1f1;
+}
+
+.playerscore:nth-child(even) {
+    background-color: #eeeeee;
+}
+
+.playerLabel {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* 문제 텍스트 */
+#genre {
+    font-size: 14px;
+    color: gray;
+}
+
+#question {
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+/* 힌트 */
+.hint {
+    margin-top: 15px;
+    font-size: 24px;
+}
+
+/* 타이머 진행 바 */
+.timerWrap {
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 10px;
+    overflow: hidden;
+    background-color: lightgray;
+}
+
+#timer {
+    width: 100%;
+    height: 100%;
+    background-color: #3E4C95;
+    transition: all 1s linear;
+}
+
+/* ===== 반응형 처리 ===== */
+@media screen and (max-width: 768px) {
+    main {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    aside.ad {
+        display: none;
+        /* 모바일에선 광고 제거 또는 줄이기 */
+    }
+
+    .ContentWrap {
+        width: 90vw;
+        height: auto;
+    }
+
+    .roomInfoWrap {
+        height: auto;
+        padding: 5px;
+        flex-direction: column;
+    }
+
+    .roomInfo {
+        font-size: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 5px 10px;
+    }
+
+    .questionWrap {
+        padding: 10px;
+    }
+
+    .playerWrap {
+        position: static;
+        width: 100%;
+        height: auto;
+        margin-top: 20px;
+    }
+
+    .playerLabel {
+        font-size: 18px;
+    }
+
+    #question {
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .hint {
+        font-size: 18px;
+    }
+
+    .timerWrap {
+        height: 8px;
+    }
 }
