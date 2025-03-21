@@ -1,58 +1,130 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실시간 퀴즈 게임 - 대기 화면</title>
-    <link rel="stylesheet" href="./css/index.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <div class="logo"><span style="color:#006A79">Q</span>zone</div>
-        </header>
 
-        <!-- 방 만들기 모달 -->
-        <div id="roomModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>방 만들기</h2>
-                <label>방 이름: <input type="text" id="roomNameInput"></label>
-                <button id="createRoomBtn">방 만들기</button>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qzone - 로비</title>
+    <link rel="stylesheet" href="./css/index.css" />
+</head>
+
+<body>
+    <!-- ✅ Header 영역 -->
+    <header class="header">
+        <div id="logo" class="logo"><span class="logo-highlight">Q</span>zone</div>
+        <div class="user-profile" onclick="toggleSettingsMenu()">
+            <img src="/assets/user.png" class="avatar" alt="profile" />
+            <span class="username">홍길동</span>
+            <div class="settings-menu" id="settingsMenu">
+                <button onclick="toggleDarkMode()">다크 모드</button>
+                <button>환경 설정</button>
+                <button>로그아웃</button>
             </div>
         </div>
+    </header>
 
-        <div class="contentWrap">
-            <div class="controls">
-                <span class="btn" id="createRoom" onclick="createRoom()">방 만들기</span>
-                <span class="btn" id="joinRoom">빠른 입장</span>
+    <!-- ✅ 상호작용 버튼 영역 -->
+    <section class="controls">
+        <span class="btn" id="createRoom">방 만들기</span>
+        <span class="btn" id="joinRoom">빠른 입장</span>
+    </section>
+
+    <!-- ✅ 방 목록 영역 -->
+    <main id="roomList" class="room-list"></main>
+
+    <!-- ✅ 페이지 네비게이션 -->
+    <nav class="pagination">
+        <button id="prev-page">◀ 이전</button>
+        <span id="page-info">1 / 1</span>
+        <button id="next-page">다음 ▶</button>
+    </nav>
+
+    <!-- ✅ 방 만들기 모달 -->
+    <div class="modal" id="roomModal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal()">&times;</button>
+            <h2>방 만들기</h2>
+
+            <label>방 이름
+                <input type="text" id="roomNameInput" />
+            </label>
+
+            <label><input type="checkbox" id="privateRoom" onchange="togglePassword()" /> 비공개 방</label>
+
+            <div id="passwordWrap" style="display: none">
+                <label>비밀번호
+                    <input type="password" id="roomPassword" />
+                </label>
             </div>
-            <div class="lobby">
-                <div id="roomList"></div>
-                <div class="pagination">
-                    <button id="prev-page">◀ 이전</button>
-                    <span id="page-info">1 / 1</span>
-                    <button id="next-page">다음 ▶</button>
-                </div>
+
+            <label>장르</label>
+            <div class="genre-options">
+                <label><input type="checkbox" name="genre" value="common" /> 상식</label>
+                <label><input type="checkbox" name="genre" value="history" /> 역사</label>
+                <label><input type="checkbox" name="genre" value="sports" /> 스포츠</label>
+                <label><input type="checkbox" name="genre" value="entertainment" /> 예능</label>
             </div>
+
+            <label>제한 시간</label>
+            <div class="timer-options">
+                <label><input type="radio" name="timer" value="15" /> 15초</label>
+                <label><input type="radio" name="timer" value="30" checked /> 30초</label>
+                <label><input type="radio" name="timer" value="45" /> 45초</label>
+                <label><input type="radio" name="timer" value="60" /> 60초</label>
+            </div>
+
+            <button id="createRoomBtn">방 만들기</button>
         </div>
     </div>
-    <!--<script src="script.js"></script>-->
+
+    <!-- ✅ 모달 스크립트 -->
     <script>
-        document.getElementById("createRoom").addEventListener("click", function () {
-            document.getElementById("roomModal").style.display = "block";
+        function toggleSettingsMenu() {
+            const menu = document.getElementById('settingsMenu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function togglePassword() {
+            const wrap = document.getElementById('passwordWrap');
+            wrap.style.display = document.getElementById('privateRoom').checked ? 'block' : 'none';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('roomModal');
+            modal.style.display = 'none';
+
+            // ✅ 입력값 초기화
+            document.getElementById('roomNameInput').value = "";
+            document.getElementById('privateRoom').checked = false;
+            document.getElementById('roomPassword').value = "";
+            document.getElementById('passwordWrap').style.display = 'none';
+
+            // ✅ 장르 체크박스 초기화
+            document.querySelectorAll('input[name="genre"]').forEach(cb => cb.checked = false);
+
+            // ✅ 시간 라디오 기본값(30초)로 초기화
+            const timerRadios = document.querySelectorAll('input[name="timer"]');
+            timerRadios.forEach(r => {
+                r.checked = (r.value === "30");
+            });
+        }
+
+        document.getElementById('createRoom').addEventListener('click', () => {
+            document.getElementById('roomModal').style.display = 'flex';
         });
 
-        document.querySelector(".close").addEventListener("click", function () {
-            document.getElementById("roomModal").style.display = "none";
-        });
-
-        // 모달 바깥 클릭 시 닫기
-        window.addEventListener("click", function (event) {
-            if (event.target.id === "roomModal") {
-                document.getElementById("roomModal").style.display = "none";
+        // 바깥 클릭 시 모달 닫기
+        window.addEventListener("click", (event) => {
+            const modal = document.getElementById("roomModal");
+            if (event.target === modal) {
+                closeModal();
             }
         });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+        toggleDarkMode();
     </script>
     <script src="/js/lobby.js"></script>
 </body>
