@@ -15,21 +15,71 @@ body {
 }
 
 /* ===== Header ===== */
-header {
+.header {
     width: 100%;
     display: flex;
-    justify-content: center;
-    padding: 20px 0;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
 }
 
 .logo {
-    font-size: 40px;
+    font-size: 32px;
     font-weight: bold;
     cursor: pointer;
 }
 
 .logo-highlight {
     color: #3E4C95;
+}
+
+/* ✅ 프로필 */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    cursor: pointer;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid black;
+}
+
+.username {
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.settings-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    width: 80px;
+}
+
+.settings-menu button {
+    background: none;
+    border: none;
+    padding: 10px 10px;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.settings-menu button:hover {
+    background-color: #f0f0f0;
 }
 
 /* ===== Main Layout ===== */
@@ -78,17 +128,18 @@ aside.ad {
 
 /* 방 정보 */
 .roomInfoWrap {
+    position: relative;
     display: flex;
     align-items: center;
     width: 100%;
     height: 4vh;
-    padding-bottom: 10px;
 }
 
 .roomInfo {
     display: flex;
     align-items: center;
     width: 100%;
+    height: 4vh;
     background-color: white;
     border: 1px solid lightgray;
     padding-left: 10px;
@@ -98,6 +149,37 @@ aside.ad {
 #roomNumber {
     color: darkgray;
     margin-right: 10px;
+}
+
+.roomUtilWrap {
+    position: absolute;
+    right:0;
+
+    min-width: 100px;
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#roomConfig {
+    width: 30%;
+    aspect-ratio: 1 / 1;
+    margin-right: 10px;
+    cursor: pointer;
+    filter: invert(38%) sepia(2%) saturate(3%) hue-rotate(10deg) brightness(97%) contrast(91%);
+}
+.btn {
+    right: 3px;
+    background-color: #3E4C95;
+    color: white;
+    border: none;
+    border-radius: 3px;
+
+    width: 50%;
+    padding: 4px;
+    font-size: 16px;
+    font-family: 'DownloadFont';
+    cursor: pointer;
 }
 
 /* 문제 및 플레이어 영역 */
@@ -119,7 +201,7 @@ aside.ad {
 .playerWrap {
     position: absolute;
     z-index: 10;
-    top: 70px;
+    top: 20px;
     left: 30px;
 
     width: 140px;
@@ -132,6 +214,13 @@ aside.ad {
 #playerList {
     width: 100%;
     margin-top: 10px;
+}
+
+#playerList li {
+    border-radius: 3px;
+    background-color: #3E4C95;
+    color: white;
+    margin-bottom: 3px;
 }
 
 .playerscore {
@@ -153,6 +242,78 @@ aside.ad {
     font-size: 22px;
     font-weight: bold;
 }
+
+/* 플레이어 목록 리뉴얼 */
+.playerGridWrap {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 60vw; /* 원하는 너비 지정 */
+    margin: 0 auto;
+    padding: 10px;
+    justify-items: center;
+}
+
+.player-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 12px;
+
+    width: 100%;
+    max-width: 120px; /* 적절한 카드 폭 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.playerIcon {
+    position: relative;
+    width: 70%;
+    aspect-ratio: 1 / 1;
+    /* ✅ 정사각형 비율 유지 */
+    /*background-color: #ddd;*/
+    border-radius: 3px;
+    margin-bottom: 8px;
+
+    /* 예시용 아이콘 스타일 (원하면 이미지로 대체 가능) */
+    background-image: url('/assets/user.png');
+    background-size: cover;
+    background-position: center;
+    /*filter: invert(27%) sepia(99%) saturate(382%) hue-rotate(191deg) brightness(92%) contrast(93%);*/
+}
+.host {
+    position: absolute;
+    top: -5px;
+    right: -18px;
+
+    width: 30%;
+    aspect-ratio: 1 / 1;
+
+    background-image: url('/assets/host.png');
+    background-size: cover;
+    background-position: center;
+    filter: invert(75%) sepia(19%) saturate(1193%) hue-rotate(351deg) brightness(103%) contrast(93%);
+}
+.player-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-score {
+    font-size: 16px;
+    color: #666;
+}
+
 
 /* 문제 텍스트 */
 #genre {
