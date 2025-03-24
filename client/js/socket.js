@@ -10,6 +10,8 @@ if (!userId) {
 
 socket.onopen = () => {
     console.log("✅ 서버 연결 성공!");
+    const leftRoom = sessionStorage.getItem("leftRoom");
+    if (leftRoom === "true") return; // ✅ 나갈 예정이라면 join을 보내지 않음
     
     // 방 입장 메시지 전송
     const urlParams = new URLSearchParams(window.location.search);
@@ -33,7 +35,7 @@ socket.onclose = () => {
 };
 
 // ✅ 페이지 종료 시 방 나가기 처리
-window.addEventListener("beforeunload", () => {
+window.addEventListener("beforeunload", (event) => {
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get("roomId");
 
@@ -44,6 +46,9 @@ window.addEventListener("beforeunload", () => {
             userId
         }));
     }
+    // ✅ 새로고침 여부 저장
+    sessionStorage.setItem("leftRoom", "true");
+
     socket.close();
 });
 
