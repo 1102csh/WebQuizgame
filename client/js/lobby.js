@@ -25,23 +25,70 @@ function displayRooms(rooms) {
 
     rooms.forEach((room) => {
         const roomElement = document.createElement("div");
-        roomElement.classList.add("rooms");
-        roomElement.innerHTML = `
-            <span class='roomId'>${String(room.roomNumber).padStart(3, '0')}</span>
-            <span class='roomName'>${room.title}</span>
-            <span class='roomPlayers'>(${room.currentPlayers}/${room.maxPlayers})</span>
-        `;
-        roomElement.addEventListener("click", ()=>joinRoom(room.roomId));
+        roomElement.classList.add("room-card");
+
+        // 방 제목 영역
+        const header = document.createElement("div");
+        header.classList.add("room-header");
+
+        const titleWrap = document.createElement("div");
+        titleWrap.classList.add("room-title-wrap");
+
+        const roomId = document.createElement("span");
+        roomId.classList.add("room-id");
+        roomId.textContent = `[${String(room.roomNumber).padStart(3, "0")}]`;
+
+        const roomTitle = document.createElement("span");
+        roomTitle.classList.add("room-title");
+        roomTitle.textContent = room.title;
+
+        titleWrap.appendChild(roomId);
+        titleWrap.appendChild(roomTitle);
+
+        // 오른쪽 인원 수
+        const roomPlayers = document.createElement("span");
+        roomPlayers.classList.add("room-players");
+        roomPlayers.textContent = `${room.currentPlayers}/8명`;
+        roomElement.appendChild(roomPlayers);
+
+        // 자물쇠 아이콘 (비공개일 경우)
+        //if (room.private) {
+        const lockIcon = document.createElement("span");
+        lockIcon.classList.add("lock-icon");
+        lockIcon.textContent = "🔒";
+        roomElement.appendChild(lockIcon);
+        //}
+
+        header.appendChild(titleWrap);
+        roomElement.appendChild(header);
+
+        // 설정 정보
+        const meta = document.createElement("div");
+        meta.classList.add("room-meta");
+        //meta.innerHTML = `🛠️ 장르: ${room.genre} / 타이머: ${room.timer || 30}초`;
+        meta.innerHTML = `🛠️ 장르: 상식 / 타이머: 30초`;
+        roomElement.appendChild(meta);
+
+        roomElement.addEventListener("click", () => joinRoom(room.roomId));
         roomList.appendChild(roomElement);
     });
 }
 async function createRoom() {
-    const roomName = document.getElementById("roomNameInput").value;
-    if (!roomName) {
+    const roomName = document.getElementById("roomNameInput").value.trim();
+    const isPrivate = document.getElementById("privateRoom").checked;
+    const password = isPrivate ? document.getElementById("roomPassword").value.trim() : null;
+    const genres = Array.from(document.querySelectorAll('input[name="genre"]:checked')).map(cb => cb.value);
+
+    const timerRadio = document.querySelector('input[name="timer"]:checked');
+    const quizCountRadio = document.querySelector('input[name="quizCount"]:checked');
+
+    // ✅ 기본 유효성 검사
+    if (!roomName || genres.length === 0 || !timerRadio || !quizCountRadio) {
+        alert("모든 필드를 입력해주세요.");
         return;
     }
 
-    // ✅ hostId를 고유한 ID로 설정 (localStorage에서 가져오거나 생성)
+    // ✅ hostId 설정
     let hostId = localStorage.getItem("userId");
     if (!hostId) {
         hostId = `player_${Math.floor(Math.random() * 10000)}`;
@@ -50,8 +97,12 @@ async function createRoom() {
 
     const requestBody = {
         title: roomName,
-        maxPlayers: 8,
-        hostId: hostId, // ✅ 올바르게 설정된 hostId 사용
+        isPrivate,
+        password,
+        genres,
+        timeLimit: parseInt(timerRadio.value),
+        quizCount: parseInt(quizCountRadio.value),
+        hostId
     };
 
     try {
@@ -63,15 +114,18 @@ async function createRoom() {
 
         const result = await response.json();
         if (response.ok) {
-            fetchRooms(); // 방 목록 갱신
+            // ✅ 모달 닫기 + 입력 초기화
             document.getElementById("roomModal").style.display = "none";
             document.getElementById("roomNameInput").value = "";
-            window.location.href = `/html/game.html?roomId=${result.roomId}&host=true`; // 방장으로 게임 화면 이동
+
+            // ✅ 게임 화면으로 이동 (방장 여부는 쿼리스트링으로 표시)
+            window.location.href = `/html/game.html?roomId=${result.roomId}&host=true`;
         } else {
             alert(result.message);
         }
     } catch (error) {
         console.error("방 만들기 중 오류 발생:", error);
+        alert("방 만들기 중 오류가 발생했습니다.");
     }
 }
 async function quickJoin() {
@@ -130,8 +184,46 @@ async function fetchRoomInfo(roomId) {
     }
 }
 
+document.getElementById("createRoomBtn").addEventListener("click", async () => {
+    const title = document.getElementById("roomNameInput").value.trim();
+    const isPrivate = document.getElementById("privateRoom").checked;
+    const password = isPrivate ? document.getElementById("roomPassword").value : null;
+    const genres = Array.from(document.querySelectorAll('input[name="genre"]:checked')).map(cb => cb.value);
+    const timeLimit = parseInt(document.querySelector('input[name="timer"]:checked').value);
+    const quizCount = parseInt(document.querySelector('input[name="quizCount"]:checked').value);
+  
+    const roomData = {
+      title,
+      isPrivate,
+      password,
+      genres,
+      timeLimit,
+      quizCount,
+      hostId: localStorage.getItem("userId")
+    };
+  
+    const response = await fetch("/api/game/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(roomData)
+    });
+  
+    const result = await response.json();
+  
+    if (response.ok) {
+      window.location.href = `/html/game.html?roomId=${result.roomId}&host=true`;
+    } else {
+      alert(result.message || "방 생성 실패");
+    }
+  });
+
 // 페이지 로드 시 방 목록 가져오기
 document.addEventListener("DOMContentLoaded", fetchRooms);
-document.getElementById("createRoomBtn").addEventListener("click", createRoom);
+document.addEventListener("DOMContentLoaded", ()=>{
+    const leftRoom = sessionStorage.getItem("leftRoom");
+    if (leftRoom) {
+        sessionStorage.removeItem("leftRoom");
+    }
+});
 document.getElementById("joinRoom").addEventListener("click", quickJoin);
 setInterval(fetchRooms, 5000); // 5초마다 방 목록 갱신
