@@ -67,18 +67,28 @@ function handleLeave(ws, data) {
 
   gameRooms[roomId].players.delete(userId);
 
-  if (gameRooms[roomId].players.size === 0) {
-    delete gameRooms[roomId]; // 모든 플레이어가 나가면 방 삭제
+  // ✅ 호스트였던 사람이 나간 경우: 호스트 재선정
+  if (gameRooms[roomId].hostId === userId) {
+    const remainingPlayers = [...gameRooms[roomId].players];
+    if (remainingPlayers.length > 0) {
+      gameRooms[roomId].hostId = remainingPlayers[0]; // 첫 번째 남은 사람을 호스트로 지정
+      console.log(`👑 ${gameRooms[roomId].hostId}가 새 방장이 되었습니다.`);
+    } else {
+      // 아무도 없으면 방 삭제
+      delete gameRooms[roomId];
+      delete clients[userId];
+      return;
+    }
   }
 
   delete clients[userId];
 
-  console.log(`🚪 ${userId}가 ${roomId} 방에서 나감.`); // 디버깅 로그 추가
+  console.log(`🚪 ${userId}가 ${roomId} 방에서 나감.`);
 
-  // ✅ 남아있는 플레이어 목록을 업데이트
+  // ✅ 플레이어 목록 업데이트 (hostId 포함됨)
   broadcastPlayerList(roomId);
 
-  // ✅ 채팅창에 퇴장 메시지 출력
+  // ✅ 채팅창 메시지
   broadcast(roomId, {
     type: "chat",
     userId: "SYSTEM",
@@ -142,6 +152,7 @@ function broadcastPlayerList(roomId) {
   broadcast(roomId, {
     type: "updatePlayers",
     players: playerList,
+    hostId: gameRooms[roomId].hostId, // ✅ 여기 추가!
   });
 }
 
