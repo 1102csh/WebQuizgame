@@ -1,57 +1,43 @@
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-require("dotenv").config();
+const bcrypt = require("bcrypt");
+const db = require("../config/db");
 
-class AuthController {
-  // 회원가입
-  static async register(req, res) {
-    try {
-      const { username, email, password } = req.body;
+const JWT_SECRET = process.env.JWT_SECRET || "your_secret";
 
-      // 중복 체크
-      const existingUser = await User.findByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({ message: "이미 가입된 이메일입니다." });
-      }
+exports.register = async (req, res) => {
+  const { email, password, username } = req.body;
 
-      // 비밀번호 암호화
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const userId = await User.createUser(username, email, hashedPassword);
+  const hashed = await bcrypt.hash(password, 10);
+  await db.query("INSERT INTO users (email, username, password) VALUES (?, ?, ?)", [email, username, hashed]);
 
-      res.status(201).json({ message: "회원가입 성공!", userId });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "서버 오류 발생" });
-    }
-  }
+  const token = jwt.sign({ email, username }, JWT_SECRET, { expiresIn: "2h" });
 
-  // 로그인
-  static async login(req, res) {
-    try {
-      const { email, password } = req.body;
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: false, // HTTPS에서만 true
+    sameSite: "strict",
+  });
 
-      // 유저 찾기
-      const user = await User.findByEmail(email);
-      if (!user) {
-        return res.status(400).json({ message: "이메일 또는 비밀번호가 잘못되었습니다." });
-      }
+  res.json({ success: true });
+};
 
-      // 비밀번호 검증
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: "이메일 또는 비밀번호가 잘못되었습니다." });
-      }
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
 
-      // JWT 토큰 생성
-      const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  if (rows.length === 0) return res.status(401).json({ message: "이메일 없음" });
 
-      res.json({ message: "로그인 성공!", token, userId: user.id, username: user.username });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "서버 오류 발생" });
-    }
-  }
-}
+  const user = rows[0];
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return res.status(401).json({ message: "비밀번호 틀림" });
 
-module.exports = AuthController;
+  const token = jwt.sign({ email: user.email, username: user.username }, JWT_SECRET, { expiresIn: "2h" });
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+  });
+
+  res.json({ success: true });
+};
