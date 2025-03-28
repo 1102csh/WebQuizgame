@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Qzone - 로그인 / 회원가입</title>
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+  <div class="auth-container">
+    <div class="tabs">
+      <button id="loginTab" class="active">로그인</button>
+      <button id="registerTab">회원가입</button>
+    </div>
+
+    <form id="loginForm" class="form active">
+      <h2>로그인</h2>
+      <input type="email" id="loginEmail" placeholder="이메일" required />
+      <input type="password" id="loginPassword" placeholder="비밀번호" required />
+      <button type="submit">로그인</button>
+    </form>
+
+    <form id="registerForm" class="form">
+      <h2>회원가입</h2>
+      <input type="text" id="registerUsername" placeholder="사용자 이름" required />
+      <input type="email" id="registerEmail" placeholder="이메일" required />
+      <input type="password" id="registerPassword" placeholder="비밀번호" required />
+      <button type="submit">회원가입</button>
+    </form>
+
+    <p id="message" class="message"></p>
+  </div>
+
+  <script src="../js/auth.js"></script>
+</body>
+</html>
