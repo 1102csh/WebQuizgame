@@ -3,13 +3,38 @@ const gameRooms = require("./gameRooms");
 const { getRandomQuiz } = require("./utils/quizUtil");
 const { saveRanking } = require("./utils/rankingUtil");
 
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const clients = {};
 const MAX_QUESTIONS = 5; // 한 게임당 문제 개수
+
+function parseCookies(cookieHeader) {
+    if (!cookieHeader) return {};
+    return Object.fromEntries(cookieHeader.split(";").map(c => {
+        const [key, ...val] = c.trim().split("=");
+        return [key, decodeURIComponent(val.join("="))];
+    }));
+}
 
 function setupWebSocket(server) {
     const wss = new WebSocket.Server({ server });
 
-    wss.on("connection", (ws) => {
+    wss.on("connection", (ws, req) => {
+
+        const cookies = parseCookies(req.headers.cookie || "");
+        const token = cookies.token;
+
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            ws.user = decoded; // ✅ 유저 정보 저장 (예: { userId, username })
+            console.log("✅ WebSocket 인증 성공:", decoded.username);
+        } catch (err) {
+            console.warn("❌ WebSocket 인증 실패: 연결 종료");
+            return ws.close(); // 인증 실패 시 연결 종료
+        }
+
         ws.on("message", async (message) => {
             const data = JSON.parse(message);
 
@@ -189,6 +214,7 @@ function handleJoin(ws, data) {
     const { roomId, userId } = data;
 
     if (!gameRooms[roomId]) return ws.send(JSON.stringify({ type: "error", message: "방을 찾을 수 없습니다." }));
+    if (!userId) return ws.send(JSON.stringify({ type: "error", message: "인증 실패"}));
 
     gameRooms[roomId].players.add(userId);
     clients[userId] = ws;
@@ -231,7 +257,11 @@ function updatePlayerList(roomId) {
 
     broadcast(roomId, {
         type: "updatePlayers",
-        players: playerList,
+        players: [...gameRooms[roomId].players].map(id => ({
+            userId: id,
+            score: gameRooms[roomId].scoreboard?.[id] || 0
+        })),
+        hostId: gameRooms[roomId].hostId // ✅ 이거 포함 필요!
     });
 }
 
