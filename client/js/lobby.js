@@ -191,35 +191,42 @@ document.getElementById("createRoomBtn").addEventListener("click", async () => {
     const genres = Array.from(document.querySelectorAll('input[name="genre"]:checked')).map(cb => cb.value);
     const timeLimit = parseInt(document.querySelector('input[name="timer"]:checked').value);
     const quizCount = parseInt(document.querySelector('input[name="quizCount"]:checked').value);
-  
+
     const roomData = {
-      title,
-      isPrivate,
-      password,
-      genres,
-      timeLimit,
-      quizCount,
-      hostId: localStorage.getItem("userId")
+        title,
+        isPrivate,
+        password,
+        genres,
+        timeLimit,
+        quizCount,
+        hostId: localStorage.getItem("userId")
     };
-  
+
     const response = await fetch("/api/game/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(roomData)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(roomData)
     });
-  
+
     const result = await response.json();
-  
+
     if (response.ok) {
-      window.location.href = `/html/game.html?roomId=${result.roomId}&host=true`;
+        window.location.href = `/html/game.html?roomId=${result.roomId}&host=true`;
     } else {
-      alert(result.message || "방 생성 실패");
+        alert(result.message || "방 생성 실패");
     }
-  });
+});
+
+function logout() {
+    document.cookie = "token=; Max-Age=0"; // 삭제
+    localStorage.clear();
+    window.location.href = "/auth.html";
+}
+
 
 // 페이지 로드 시 방 목록 가져오기
 document.addEventListener("DOMContentLoaded", fetchRooms);
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded", () => {
     const leftRoom = sessionStorage.getItem("leftRoom");
     if (leftRoom) {
         sessionStorage.removeItem("leftRoom");
