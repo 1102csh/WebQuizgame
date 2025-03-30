@@ -35,9 +35,11 @@ exports.login = async (req, res) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: false,
-    sameSite: "strict",
+    secure: false, // HTTPS 사용 시 true로
+    sameSite: "lax",
+    maxAge: 60 * 60 * 1000, // 1시간
   });
-
-  res.json({ success: true });
+  
+  res.json({ message: "로그인 성공!", userId: user.id, username: user.username });
+  
 };
