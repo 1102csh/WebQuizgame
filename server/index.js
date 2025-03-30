@@ -12,6 +12,9 @@ const app = express();
 const server = http.createServer(app); // HTTP 서버 생성
 setupWebSocket(server); // WebSocket 서버 실행
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser()); // 🔥 쿠키 파서 적용
+
 const PORT = process.env.PORT || 8080;
 
 app.use(cors());
