@@ -1,268 +1,271 @@
 const WebSocket = require("ws");
+const jwt = require("jsonwebtoken");
+const cookie = require("cookie");
+
 const gameRooms = require("./gameRooms");
 const { getRandomQuiz } = require("./utils/quizUtil");
 const { saveRanking } = require("./utils/rankingUtil");
 
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const clients = {};
-const MAX_QUESTIONS = 5; // 한 게임당 문제 개수
+const clients = {}; // userId -> ws
+const MAX_QUESTIONS = 5;
 
 function parseCookies(cookieHeader) {
-    if (!cookieHeader) return {};
-    return Object.fromEntries(cookieHeader.split(";").map(c => {
-        const [key, ...val] = c.trim().split("=");
-        return [key, decodeURIComponent(val.join("="))];
-    }));
+  if (!cookieHeader) return {};
+  return Object.fromEntries(
+    cookieHeader.split(";").map(c => {
+      const [key, ...val] = c.trim().split("=");
+      return [key, decodeURIComponent(val.join("="))];
+    })
+  );
 }
 
 function setupWebSocket(server) {
-    const wss = new WebSocket.Server({ server });
+  const wss = new WebSocket.Server({ server });
 
-    wss.on("connection", (ws, req) => {
+  wss.on("connection", (ws, req) => {
+    const cookies = parseCookies(req.headers.cookie || "");
+    const token = cookies.token;
 
-        const cookies = parseCookies(req.headers.cookie || "");
-        const token = cookies.token;
-
-        try {
-            const decoded = jwt.verify(token, JWT_SECRET);
-            ws.user = decoded; // ✅ 유저 정보 저장 (예: { userId, username })
-            console.log("✅ WebSocket 인증 성공:", decoded.username);
-        } catch (err) {
-            console.warn("❌ WebSocket 인증 실패: 연결 종료");
-            return ws.close(); // 인증 실패 시 연결 종료
-        }
-
-        ws.on("message", async (message) => {
-            const data = JSON.parse(message);
-
-            switch (data.type) {
-                case "join":
-                    handleJoin(ws, data);
-                    break;
-                case "leave":
-                    handleLeave(ws, data);
-                    break;
-                case "chat":
-                    handleChat(data);
-                    break;
-                case "startGame":
-                    handleGameStart(data);
-                    break;
-                case "answer":
-                    handleAnswer(data);
-                    break;
-            }
-        });
-
-        ws.on("close", () => {
-            handleDisconnect(ws);
-        });
-    });
-}
-
-// 게임 시작 및 퀴즈 출제
-async function handleGameStart(data) {
-    const { roomId } = data;
-
-    if (!gameRooms[roomId]) return;
-
-    gameRooms[roomId].scoreboard = {}; // 점수판 초기화
-    gameRooms[roomId].currentQuiz = await getRandomQuiz();
-    gameRooms[roomId].answered = false;
-    gameRooms[roomId].questionCount = 1; // 첫 번째 문제
-
-    broadcast(roomId, {
-        type: "quiz",
-        question: gameRooms[roomId].currentQuiz.question,
-        genre: gameRooms[roomId].currentQuiz.genre,
-    });
-
-    setTimeout(() => {
-        if (!gameRooms[roomId]) return;
-
-        broadcast(roomId, {
-            type: "quizEnd",
-            message: `정답은: ${gameRooms[roomId].currentQuiz.answers[0]} 입니다!`,
-        });
-
-        setTimeout(() => {
-            handleNextQuestion(roomId);
-        }, 3000);
-    }, 30000);
-}
-
-// 정답 체크
-function handleAnswer(data) {
-    const { roomId, userId, message } = data;
-
-    if (!gameRooms[roomId] || !gameRooms[roomId].currentQuiz) return;
-    if (gameRooms[roomId].answered) return;
-
-    const correctAnswers = gameRooms[roomId].currentQuiz.answers.map(ans => ans.trim().toLowerCase());
-    if (correctAnswers.includes(message.trim().toLowerCase())) {
-        gameRooms[roomId].answered = true;
-
-        gameRooms[roomId].scoreboard[userId] = (gameRooms[roomId].scoreboard[userId] || 0) + 1;
-
-        broadcast(roomId, {
-            type: "correctAnswer",
-            userId,
-            message: `🎉 ${userId}님이 정답을 맞혔습니다!`,
-        });
-
-        setTimeout(() => {
-            handleNextQuestion(roomId);
-        }, 3000);
-    }
-}
-
-// 다음 문제 출제
-async function handleNextQuestion(roomId) {
-    if (!gameRooms[roomId]) return;
-
-    gameRooms[roomId].questionCount += 1;
-
-    // 게임 종료 조건
-    if (gameRooms[roomId].questionCount > MAX_QUESTIONS) {
-        return handleGameEnd(roomId);
+    if (!token) {
+      ws.close(4001, "토큰이 없습니다.");
+      return;
     }
 
-    gameRooms[roomId].currentQuiz = await getRandomQuiz();
-    gameRooms[roomId].answered = false;
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      ws.user = decoded; // userId, username 저장
+      clients[decoded.userId] = ws;
+      console.log(`✅ WebSocket 인증 성공: ${decoded.username}`);
+    } catch (err) {
+      console.error("❌ 인증 실패:", err.message);
+      ws.close(4002, "인증 실패");
+      return;
+    }
 
-    broadcast(roomId, {
-        type: "quiz",
-        question: gameRooms[roomId].currentQuiz.question,
-        genre: gameRooms[roomId].currentQuiz.genre,
+    ws.on("message", async (message) => {
+      const data = JSON.parse(message);
+      const { type } = data;
+
+      switch (type) {
+        case "join": return handleJoin(ws, data);
+        case "leave": return handleLeave(ws, data);
+        case "chat": return handleChat(data);
+        case "startGame": return handleGameStart(data);
+        case "answer": return handleAnswer(data);
+      }
     });
 
-    setTimeout(() => {
-        broadcast(roomId, {
-            type: "quizEnd",
-            message: `정답은: ${gameRooms[roomId].currentQuiz.answers[0]} 입니다!`,
-        });
-
-        setTimeout(() => {
-            handleNextQuestion(roomId);
-        }, 3000);
-    }, 30000);
+    ws.on("close", () => {
+      handleDisconnect(ws);
+    });
+  });
 }
 
-// 게임 종료
-function handleGameEnd(roomId) {
-    if (!gameRooms[roomId]) return;
+// ✅ join 처리
+function handleJoin(ws, { roomId }) {
+  const { userId, username } = ws.user;
+  if (!gameRooms[roomId]) return;
 
-    const scoreboard = gameRooms[roomId].scoreboard;
-    const sortedScores = Object.entries(scoreboard).sort((a, b) => b[1] - a[1]);
-    const winner = sortedScores.length > 0 ? sortedScores[0][0] : "없음";
+  gameRooms[roomId].players.add(userId);
+  clients[userId] = ws;
 
-    broadcast(roomId, {
-        type: "gameEnd",
-        message: "게임 종료!",
-        scoreboard,
-        winner,
-    });
+  console.log(`✅ ${userId} (${username})가 ${roomId} 방에 입장함.`);
+  updatePlayerList(roomId);
 
-    // 게임방 삭제
+  broadcast(roomId, {
+    type: "chat",
+    userId: "SYSTEM",
+    message: `${username}님이 입장했습니다.`,
+  });
+}
+
+// ✅ leave 처리
+function handleLeave(ws, { roomId }) {
+  const { userId, username } = ws.user;
+  if (!gameRooms[roomId]) return;
+
+  gameRooms[roomId].players.delete(userId);
+  delete clients[userId];
+
+  if (gameRooms[roomId].players.size === 0) {
     delete gameRooms[roomId];
+    return;
+  }
+
+  // 방장 재선정
+  if (gameRooms[roomId].hostId === userId) {
+    const [newHost] = gameRooms[roomId].players;
+    gameRooms[roomId].hostId = newHost;
+    console.log(`👑 ${newHost}가 새 방장이 되었습니다.`);
+  }
+
+  updatePlayerList(roomId);
+
+  broadcast(roomId, {
+    type: "chat",
+    userId: "SYSTEM",
+    message: `${username}님이 퇴장했습니다.`,
+  });
 }
 
-function broadcast(roomId, message) {
-    if (!gameRooms[roomId]) return;
+// ✅ 채팅 처리
+function handleChat({ roomId, message }, userId = null) {
+  if (!gameRooms[roomId]) return;
 
-    gameRooms[roomId].players.forEach((playerId) => {
-        if (clients[playerId]) {
-            clients[playerId].send(JSON.stringify(message));
-        }
-    });
+  broadcast(roomId, {
+    type: "chat",
+    userId: userId || "SYSTEM",
+    message,
+  });
 }
 
-function handleDisconnect(ws) {
-    const userId = Object.keys(clients).find((key) => clients[key] === ws);
-    if (!userId) return;
+// ✅ 게임 시작
+async function handleGameStart({ roomId }) {
+  if (!gameRooms[roomId]) return;
 
-    let roomId = null;
+  gameRooms[roomId].scoreboard = {};
+  gameRooms[roomId].questionCount = 1;
+  gameRooms[roomId].answered = false;
 
-    for (const [id, room] of Object.entries(gameRooms)) {
-        if (room.players.has(userId)) { // ✅ Set 사용
-            roomId = id;
-            break;
-        }
-    }
+  const quiz = await getRandomQuiz();
+  gameRooms[roomId].currentQuiz = quiz;
 
-    if (!roomId) return;
+  broadcast(roomId, {
+    type: "quiz",
+    genre: quiz.genre,
+    question: quiz.question,
+  });
 
-    gameRooms[roomId].players.delete(userId);
-
-    if (gameRooms[roomId].players.size === 0) {
-        delete gameRooms[roomId];
-    }
-
-    delete clients[userId];
-
-    // ✅ 모든 플레이어에게 업데이트 전송
-    updatePlayerList(roomId);
-
-    console.log(`🚪 사용자 ${userId} 연결 종료 (방 ID: ${roomId})`);
+  setTimeout(() => {
+    endQuestion(roomId);
+  }, 30000);
 }
 
-// ✅ 플레이어가 방에 입장할 때 처리
-function handleJoin(ws, data) {
-    const { roomId, userId } = data;
+// ✅ 정답 확인
+function handleAnswer({ roomId, message }, ws) {
+  const userId = ws.user?.userId;
+  if (!userId || !gameRooms[roomId]) return;
 
-    if (!gameRooms[roomId]) return ws.send(JSON.stringify({ type: "error", message: "방을 찾을 수 없습니다." }));
-    if (!userId) return ws.send(JSON.stringify({ type: "error", message: "인증 실패"}));
+  const quiz = gameRooms[roomId].currentQuiz;
+  if (!quiz || gameRooms[roomId].answered) return;
 
-    gameRooms[roomId].players.add(userId);
-    clients[userId] = ws;
+  const correctAnswers = quiz.answers.map(ans => ans.trim().toLowerCase());
+  if (correctAnswers.includes(message.trim().toLowerCase())) {
+    gameRooms[roomId].answered = true;
 
-    console.log(`✅ ${userId}가 ${roomId} 방에 입장함.`);
-
-    // ✅ 참여자 목록을 갱신하여 모든 사람에게 전송
-    updatePlayerList(roomId);
-}
-
-// ✅ 플레이어가 방에서 나갈 때 처리
-function handleLeave(ws, data) {
-    const { roomId, userId } = data;
-
-    if (!gameRooms[roomId]) return;
-
-    // ✅ Set에서 정확한 userId 삭제
-    gameRooms[roomId].players.delete(userId);
-
-    if (gameRooms[roomId].players.size === 0) {
-        delete gameRooms[roomId]; // 모든 플레이어가 나가면 방 삭제
-    }
-
-    delete clients[userId];
-
-    // 모든 플레이어에게 방 정보 갱신 전송
-    updatePlayerList(roomId);
-}
-
-// ✅ 모든 클라이언트에게 방 참여자 목록 업데이트 전송
-function updatePlayerList(roomId) {
-    if (!gameRooms[roomId]) return;
-
-    const playerList = Array.from(gameRooms[roomId].players).map((playerId) => ({
-        userId: playerId,
-        score: gameRooms[roomId].scoreboard ? gameRooms[roomId].scoreboard[playerId] || 0 : 0,
-    }));
-
-    console.log(`📤 ${roomId} 방의 새로운 참여자 목록:`, playerList);
+    gameRooms[roomId].scoreboard[userId] = (gameRooms[roomId].scoreboard[userId] || 0) + 1;
 
     broadcast(roomId, {
-        type: "updatePlayers",
-        players: [...gameRooms[roomId].players].map(id => ({
-            userId: id,
-            score: gameRooms[roomId].scoreboard?.[id] || 0
-        })),
-        hostId: gameRooms[roomId].hostId // ✅ 이거 포함 필요!
+      type: "correctAnswer",
+      userId,
+      message: `🎉 ${userId}님이 정답을 맞혔습니다!`,
     });
+
+    setTimeout(() => {
+      nextQuestion(roomId);
+    }, 3000);
+  }
+}
+
+// ✅ 문제 끝내기
+function endQuestion(roomId) {
+  const quiz = gameRooms[roomId]?.currentQuiz;
+  if (!quiz) return;
+
+  broadcast(roomId, {
+    type: "quizEnd",
+    message: `정답은 ${quiz.answers[0]}입니다.`,
+  });
+
+  setTimeout(() => {
+    nextQuestion(roomId);
+  }, 3000);
+}
+
+// ✅ 다음 문제
+async function nextQuestion(roomId) {
+  if (!gameRooms[roomId]) return;
+
+  gameRooms[roomId].questionCount += 1;
+  if (gameRooms[roomId].questionCount > MAX_QUESTIONS) {
+    return endGame(roomId);
+  }
+
+  const quiz = await getRandomQuiz();
+  gameRooms[roomId].currentQuiz = quiz;
+  gameRooms[roomId].answered = false;
+
+  broadcast(roomId, {
+    type: "quiz",
+    genre: quiz.genre,
+    question: quiz.question,
+  });
+
+  setTimeout(() => {
+    endQuestion(roomId);
+  }, 30000);
+}
+
+// ✅ 게임 종료
+function endGame(roomId) {
+  const scoreboard = gameRooms[roomId].scoreboard || {};
+  const sorted = Object.entries(scoreboard).sort((a, b) => b[1] - a[1]);
+  const winner = sorted.length ? sorted[0][0] : "없음";
+
+  broadcast(roomId, {
+    type: "gameEnd",
+    message: "게임 종료!",
+    scoreboard,
+    winner,
+  });
+
+  delete gameRooms[roomId];
+}
+
+// ✅ 플레이어 목록 전송
+function updatePlayerList(roomId) {
+  if (!gameRooms[roomId]) return;
+
+  const players = Array.from(gameRooms[roomId].players).map(id => ({
+    userId: id,
+    score: gameRooms[roomId].scoreboard?.[id] || 0,
+  }));
+
+  broadcast(roomId, {
+    type: "updatePlayers",
+    players,
+    hostId: gameRooms[roomId].hostId,
+  });
+}
+
+// ✅ 퇴장 처리
+function handleDisconnect(ws) {
+  const userId = ws.user?.userId;
+  if (!userId) return;
+
+  delete clients[userId];
+
+  for (const roomId in gameRooms) {
+    if (gameRooms[roomId].players.has(userId)) {
+      handleLeave(ws, { roomId });
+      break;
+    }
+  }
+}
+
+// ✅ 메시지 브로드캐스트
+function broadcast(roomId, message) {
+  if (!gameRooms[roomId]) return;
+
+  gameRooms[roomId].players.forEach((userId) => {
+    const ws = clients[userId];
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(message));
+    }
+  });
 }
 
 module.exports = setupWebSocket;
