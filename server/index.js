@@ -6,11 +6,10 @@ require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
 const gameRoutes = require("./routes/gameRoutes");
-const setupWebSocket = require("./server");
+const setupWebSocket = require("./socket");
 
 const app = express();
 const server = http.createServer(app); // HTTP 서버 생성
-setupWebSocket(server); // WebSocket 서버 실행
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser()); // 🔥 쿠키 파서 적용
@@ -34,3 +33,5 @@ app.get("/", (req, res) => {
 server.listen(PORT, () => {
     console.log(`서버가 http://localhost:${PORT} 에서 실행 중`);
 });
+
+setupWebSocket(server); // WebSocket 서버 실행
