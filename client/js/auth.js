@@ -18,18 +18,14 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
-
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
     const data = await res.json();
     if (res.ok) {
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("username", data.username);
       window.location.href = "/index.html";
     } else {
       document.getElementById("message").textContent = data.message;
@@ -65,15 +61,23 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const token = getCookie("token");
-
-  if (token) {
-    // 토큰이 있으면 자동 로그인 상태로 판단 → 메인 페이지로 이동
-    console.log("✅ 자동 로그인 중...");
-    window.location.href = "/index.html";
-  }
+// ✅ 자동 로그인 확인
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("/api/auth/me");
+    if (res.ok) {
+      const user = await res.json();
+      console.log("✅ 자동 로그인 중...", user);
+      window.location.href = "/index.html";
+    }
+  } catch {}
 });
+
+// ✅ 로그아웃 함수
+async function logout() {
+  await fetch("/api/auth/logout", { method: "POST" });
+  window.location.href = "/html/auth.html";
+} 
 
 function getCookie(name) {
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
