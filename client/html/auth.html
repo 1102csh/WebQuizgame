@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Qzone - 로그인 / 회원가입</title>
   <link rel="stylesheet" href="../css/auth.css" />
 </head>
+
 <body>
+
+  <!-- ✅ Header 영역 -->
+  <header class="header">
+    <div id="logo" class="logo"><span class="logo-highlight">Q</span>zone</div>
+  </header>
+
   <div class="auth-container">
     <div class="tabs">
       <button id="loginTab" class="active">로그인</button>
@@ -32,5 +40,12 @@
   </div>
 
   <script src="../js/auth.js"></script>
+  <script>
+    // 로고 클릭 시 로비로 이동
+    document.getElementById("logo").addEventListener("click", () => {
+      window.location.href = "/index.html";
+    });
+  </script>
 </body>
+
 </html>
