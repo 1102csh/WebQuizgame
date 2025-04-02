@@ -113,6 +113,13 @@ async function createRoom() {
         });
 
         const result = await response.json();
+
+        if (response.status === 401) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "/html/auth.html";
+            return;
+        }
+
         if (response.ok) {
             // ✅ 모달 닫기 + 입력 초기화
             document.getElementById("roomModal").style.display = "none";
@@ -132,6 +139,12 @@ async function quickJoin() {
     try {
         const response = await fetch("/api/game/quick-join", { method: "POST" });
         const result = await response.json();
+
+        if (response.status === 401) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "/html/auth.html";
+            return;
+        }
 
         if (response.ok) {
             window.location.href = `/html/game.html?roomId=${result.roomId}`;
@@ -158,6 +171,12 @@ async function joinRoom(roomId) {
         });
 
         const result = await response.json();
+
+        if (response.status === 401) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "/html/auth.html";
+            return;
+        }
 
         if (response.ok) {
             window.location.href = `/html/game.html?roomId=${roomId}`;
@@ -209,6 +228,12 @@ document.getElementById("createRoomBtn").addEventListener("click", async () => {
     });
 
     const result = await response.json();
+
+    if (response.status === 401) {
+        alert("로그인이 필요합니다.");
+        window.location.href = "/html/auth.html";
+        return;
+    }
 
     if (response.ok) {
         window.location.href = `/html/game.html?roomId=${result.roomId}&host=true`;
