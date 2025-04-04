@@ -38,6 +38,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // ✅ 쿠키 수신을 위한 설정
       body: JSON.stringify({ email, password }),
     });
 
