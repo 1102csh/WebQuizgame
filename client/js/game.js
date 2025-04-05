@@ -1,33 +1,84 @@
 import { addMessageHandler, sendMessage } from "./socket.js";
 window.sendAnswer = sendAnswer; // 전역등록
 
-// ✅ 게임 방 정보 가져오기
+// ✅ 쿠키에서 값 추출
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+    return match ? decodeURIComponent(match[2]) : null;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const roomId = urlParams.get("roomId");
+const isHost = urlParams.get("host") === "true";
+console.log("🎯 현재 URL의 roomId:", roomId); // 추가
+
+let currentUserId = null; // 서버에서 받은 userId
+let currentHostId = null; // 서버에서 받은 hostId
+
+// ✅ 방 정보 불러오기
 async function fetchRoomInfo() {
 
-    // ✅ URL에서 roomId 가져오기
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomId = urlParams.get("roomId");
-
     try {
-        const response = await fetch(`/api/game/room/${roomId}`);
-        const roomData = await response.json();
+        const response = await fetch(`/api/game/room/${roomId}`, {
+            method: "GET",
+            credentials: "include" // ✅ 추가!
+        });
 
-        if (!response.ok || !roomData) {
-            alert(roomData.message);
-            window.location.href = "/"; // 방이 없으면 로비로 이동
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message);
+            window.location.href = "/index.html";
             return;
         }
 
-        // 방 정보 표시
-        document.getElementById("roomTitle").textContent = roomData.title;
-        document.getElementById("roomNumber").textContent = `[${String(roomData.roomNumber).padStart(3, "0")}]`;
+        currentHostId = data.hostId;
+        document.getElementById("roomNumber").textContent = `[ ${data.roomNumber} ]`;
+        document.getElementById("roomTitle").textContent = data.title;
 
-        // 플레이어 목록 표시
-        displayPlayers(roomData.players, roomData.hostId);
-    } catch (error) {
-        console.error("방 정보 불러오기 오류:", error);
+        displayPlayers(data.players, currentHostId);
+    } catch (err) {
+        console.error("방 정보 불러오기 오류:", err);
     }
 }
+
+// ✅ 유저 인증된 토큰에서 userId 파싱
+(function identifyUser() {
+    const token = getCookie("token");
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            currentUserId = payload.userId;
+        } catch (err) {
+            console.error("❌ 유저 파싱 실패", err);
+        }
+    }
+})();
+
+// ✅ 게임 관련 WebSocket 메시지 처리
+addMessageHandler((data) => {
+    switch (data.type) {
+        case "updatePlayers":
+            displayPlayers(data.players, data.hostId);
+            break;
+        case "quiz":
+            displayQuestion(data);
+            break;
+        case "quizEnd":
+            displayMessage(data.message);
+            break;
+        case "correctAnswer":
+            displayMessage(data.message);
+            updateScore(data.userId);
+            break;
+        case "answer":
+            displayAnswer(data);
+            break;
+        case "gameEnd":
+            displayFinalScores(data);
+            break;
+    }
+});
 
 // ✅ 정답 제출 함수
 export function sendAnswer() {
@@ -43,41 +94,6 @@ export function sendAnswer() {
     answerInput.value = "";
     answerInput.focus();
 }
-
-// ✅ 게임 시작 버튼
-document.getElementById("start-game-btn")?.addEventListener("click", () => {
-    sendMessage("startGame");
-});
-
-// ✅ 게임 관련 WebSocket 메시지 처리
-addMessageHandler((data) => {
-    //console.log("📩 게임에서 받은 데이터:", data);
-
-    switch (data.type) {
-        case "quiz":
-            displayQuestion(data);
-            break;
-        case "quizEnd":
-            displayMessage(data.message);
-            break;
-        case "correctAnswer":
-            displayMessage(data.message);
-            updateScore(data.userId);
-            break;
-        case "gameEnd":
-            displayFinalScores(data);
-            break;
-        case "updatePlayers":
-            displayPlayers(data.players, data.hostId);
-            break;
-        case "answer":
-            displayAnswer(data);
-            break;
-        case "chat":
-            displayChatMessage(data);
-            break;
-    }
-});
 
 // ✅ DOM이 로드된 후 방 정보 불러오기
 document.addEventListener("DOMContentLoaded", fetchRoomInfo);
@@ -136,48 +152,41 @@ function displayFinalScores(data) {
     });
 }
 
+// ✅ 플레이어 출력
 function displayPlayers(players, hostId) {
-
-    /*
-    const playerList = document.getElementById("playerList");
-    playerList.innerHTML = "";
-
-    players.forEach(player => {
-        const playerElement = document.createElement("li");
-        playerElement.textContent = `${player.userId} - ${player.score}점`;
-        playerList.appendChild(playerElement);
-    });
-    */
-
     const playerList = document.getElementById("playerList");
     playerList.innerHTML = "";
 
     players.forEach((player) => {
         const playerCard = document.createElement("div");
-        playerCard.classList.add("player-card");
+        playerCard.className = "player-card";
 
-        //console.log("🧾 유저ID:", player.userId, " | 호스트ID:", hostId);
+        const isHost = player.userId === hostId;
+        const isCurrent = player.userId === currentUserId;
 
-        const isHost = String(player.userId).trim() === String(hostId).trim();
-        const crown = isHost ? "<div class='host'></div>" : "";
-
-        // ✅ 방장이라면 버튼을 보여준다
-        const startBtn = document.getElementById("startGameBtn");
-        if ((localStorage.getItem("userId") || "").trim() === (hostId || "").trim()) {
-            startBtn.style.display = "block";
-        }
-        else {
-            startBtn.style.display = "none";
-        }
-
-        playerCard.innerHTML += `
-            <div class="playerIcon">${crown}</div>
-            <div class="player-name">${player.userId}</div>
-            <div class="player-score">${player.score}점</div>
-        `;
+        playerCard.innerHTML = `
+        <div class="playerIcon">${isHost ? "<span class='host'></span>" : ""}</div>
+        <div class="player-name">${player.userId}</div>
+        <div class="player-score">${player.score}점</div>
+      `;
 
         playerList.appendChild(playerCard);
     });
+
+    // ✅ 내가 호스트인 경우 게임 시작 버튼 표시
+    if (currentUserId === hostId && !document.querySelector(".start-btn")) {
+        const startBtn = document.createElement("button");
+        startBtn.textContent = "게임 시작";
+        startBtn.classList.add("start-btn");
+        startBtn.id = "start-game-btn";
+        startBtn.addEventListener("click", () => {
+            sendMessage("startGame");
+        });
+        document.querySelector(".roomInfoWrap").appendChild(startBtn);
+    } else if (currentUserId !== hostId) {
+        const btn = document.querySelector(".start-btn");
+        if (btn) btn.remove();
+    }
 }
 
 // ✅ 정답 메시지 출력 함수
@@ -192,6 +201,7 @@ function displayAnswer(data) {
 document.addEventListener("DOMContentLoaded", () => {
     const leftRoom = sessionStorage.getItem("leftRoom");
     if (leftRoom === "true") {
+        sessionStorage.removeItem("leftRoom"); // ✅ 남아있는 플래그 제거
         window.location.href = "/index.html";
         return;
     }
