@@ -46,7 +46,7 @@ class GameController {
         genres,
         timeLimit,
         quizCount,
-        players: new Set([userId]),
+        players: new Set(),
         hostId: userId,
         scoreboard: {},
       };
