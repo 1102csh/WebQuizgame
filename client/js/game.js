@@ -160,16 +160,38 @@ function displayPlayers(players, hostId) {
     players.forEach((player) => {
         const playerCard = document.createElement("div");
         playerCard.className = "player-card";
-
+    
         const isHost = player.userId === hostId;
-        const isCurrent = player.userId === currentUserId;
-
-        playerCard.innerHTML = `
-        <div class="playerIcon">${isHost ? "<span class='host'></span>" : ""}</div>
-        <div class="player-name">${player.userId}</div>
-        <div class="player-score">${player.score}점</div>
-      `;
-
+        const displayName = player.username || player.userId;
+    
+        console.log("✅ 렌더링 player 정보:", {
+            userId: player.userId,
+            username: player.username,
+            displayName
+          });
+          
+        // 👑 호스트 표시
+        const iconDiv = document.createElement("div");
+        iconDiv.className = "playerIcon";
+        if (isHost) {
+            const crown = document.createElement("span");
+            crown.className = "host";
+            iconDiv.appendChild(crown);
+        }
+    
+        // 이름
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "player-name";
+        nameDiv.textContent = displayName;
+    
+        // 점수
+        const scoreDiv = document.createElement("div");
+        scoreDiv.className = "player-score";
+        scoreDiv.textContent = `${player.score}점`;
+    
+        playerCard.appendChild(iconDiv);
+        playerCard.appendChild(nameDiv);
+        playerCard.appendChild(scoreDiv);
         playerList.appendChild(playerCard);
     });
 
