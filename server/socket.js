@@ -69,10 +69,16 @@ function handleJoin(ws, { roomId }) {
   const { userId, username } = ws.user;
   if (!gameRooms[roomId]) return;
 
+  console.log("📌 join 요청:", userId, username);
+
+  if (gameRooms[roomId].players.has(userId)) {
+    console.warn("⚠️ 중복 join 시도:", userId);
+    return;
+  }
+
   gameRooms[roomId].players.add(userId);
   clients[userId] = ws;
 
-  console.log(`✅ ${userId} (${username})가 ${roomId} 방에 입장함.`);
   updatePlayerList(roomId);
 
   broadcast(roomId, {
@@ -229,9 +235,10 @@ function endGame(roomId) {
 function updatePlayerList(roomId) {
   if (!gameRooms[roomId]) return;
 
-  const players = Array.from(gameRooms[roomId].players).map(id => ({
-    userId: id,
-    score: gameRooms[roomId].scoreboard?.[id] || 0,
+  const players = Array.from(gameRooms[roomId].players).map((userId) => ({
+    userId,
+    score: gameRooms[roomId].scoreboard?.[userId] || 0,
+    username: clients[userId]?.user?.username || "알 수 없음"
   }));
 
   broadcast(roomId, {
