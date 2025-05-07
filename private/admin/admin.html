@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>문제 등록 관리자 페이지</title>
+  <link href="./style.css" rel="stylesheet">
+</head>
+<body>
+  <h2>문제 등록</h2>
+  <form id="quizForm">
+    <label>문제 유형:
+      <select id="type">
+        <option value="text">텍스트</option>
+        <option value="image">이미지</option>
+        <option value="audio">오디오</option>
+      </select>
+    </label><br/>
+
+    <label>문제 내용 (텍스트/URL):
+      <br/><textarea id="content" required></textarea>
+    </label><br/>
+
+    <label>문제 설명 (텍스트 설명):
+      <br/><textarea type="text" id="questionText" ></textarea>
+    </label><br/>
+
+    <label>장르:
+      <br/><input type="text" id="genre" />
+    </label><br/>
+
+    <label>정답 (쉼표로 구분):
+      <br/><input type="text" id="answers" placeholder="예: 정답1,정답2" />
+    </label><br/>
+
+    <button type="submit">문제 등록</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
