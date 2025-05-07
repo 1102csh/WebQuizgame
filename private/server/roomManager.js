@@ -4,12 +4,14 @@ class RoomManager {
   constructor(roomId) {
     this.roomId = roomId;
     this.players = []; // { ws, name, id }
+    this.playersById = new Map(); // key: ws.id, value: { name, ws }
     this.hostId = null;
     this.game = null;
   }
 
   addPlayer(ws, name) {
     this.players.push({ ws, name, id: ws.id });
+    this.playersById.set(ws.id, { name, ws });
 
     // 최초 입장자는 방장
     if (!this.hostId) {
@@ -27,7 +29,8 @@ class RoomManager {
 
   removePlayer(ws) {
     this.players = this.players.filter(p => p.id !== ws.id);
-
+    this.playersById.delete(ws.id);
+    
     // 방장이 나간 경우 다른 사람에게 위임
     if (ws.id === this.hostId && this.players.length > 0) {
       this.hostId = this.players[0].id;
