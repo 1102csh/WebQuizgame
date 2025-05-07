@@ -42,29 +42,43 @@ module.exports = function socketHandler(ws, wss) {
     });
 };
 
-function handleJoinRoom(ws, { name }) {
-    if (!name) return;
+function handleJoinRoom(ws, payload) {
+    if (!payload) return;
 
-    const roomId = 'default'; // 또는 UUID 등
+    const name = payload.name;
+    const roomId = payload.roomId;
+
     if (!rooms[roomId]) {
         rooms[roomId] = new RoomManager(roomId);
     }
 
     const room = rooms[roomId];
-    room.addPlayer(ws, name);
-
     ws.roomId = roomId;
+    
+    room.addPlayer(ws, name); // 이 시점에 ws.id가 이미 설정되어 있어야 함
+
     room.broadcastPlayerList();
 }
-function handleChat(ws, { message }) {
-    const room = rooms[ws.roomId];
-    if (!room) return;
+async function handleChat(ws, payload)  {
+    const text = payload?.text?.trim();
+    if (!text) return;
 
-    room.broadcast('chat', {
-        playerId: ws.id,
-        message
+    const room = rooms[ws.roomId];
+    const game = room?.game;
+    const playerInfo = room.playersById.get(ws.id);
+    const playerName = playerInfo?.name || '익명';
+  
+    if (game && !game.answered) {
+      const isCorrect = await game.checkAnswer(ws, text);
+      if (isCorrect) return; // 정답이면 여기서 처리 끝
+    }
+  
+    // ❗ 틀렸거나 아직 정답 아님 → 그냥 채팅으로 broadcast
+    room.broadcast('chat_message', {
+      sender: playerName,
+      message: text
     });
-}
+  }
 function handleStartGame(ws) {
     const room = rooms[ws.roomId];
     if (!room || !room.isHost(ws)) return;
