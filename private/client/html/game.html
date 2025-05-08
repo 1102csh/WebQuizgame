@@ -1,0 +1,32 @@
+<!-- client/game.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>퀴즈 게임</title>
+
+</head>
+<body>
+  <h2>퀴즈 게임</h2>
+
+  <div id="playerInfo"></div>
+  <div id="timerDisplay"></div>
+  <div id="questionBox">문제가 여기에 표시됩니다</div>
+  <div id="playerList"></div>
+
+  <div id="chatBox">
+    <div id="chatMessages"></div>
+  </div>
+
+  <input type="text" id="chatInput" placeholder="정답 또는 채팅 입력">
+  <button id="sendAnswerBtn">보내기</button>
+  <button id="scrollToBottomBtn" style="display:none">👇 최신 메시지</button>
+
+  <div id="hostControls" style="display: none">
+    <button id="startBtn">게임 시작</button>
+  </div>
+
+  <script type="module" src="../js/gameRoomManager.js"></script>
+  <script type="module" src="../js/gameScript.js"></script>
+</body>
+</html>
