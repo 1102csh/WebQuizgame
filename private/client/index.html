@@ -4,82 +4,20 @@
 <head>
   <meta charset="UTF-8" />
   <title>웹 퀴즈 게임</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 1rem;
-    }
-
-    #chat {
-      height: 200px;
-      overflow-y: scroll;
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .question {
-      font-weight: bold;
-      margin-top: 1rem;
-    }
-
-    #chatBox {
-      height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-    }
-  </style>
+  <link href="./css/index.css" rel="stylesheet">
 </head>
 
 <body>
-  <h1>웹 퀴즈 게임</h1>
-  <div>
-    <label>닉네임: <input id="nameInput" /></label><br/>
-    <label>방코드: <input type="text" id="roomCodeInput" placeholder="방 코드 입력">
-    </label><br/>
-    <button id="joinBtn">입장</button>
-  </div>
+  <h2>퀴즈 게임에 입장하세요!</h2>
+  <input type="text" id="nameInput" placeholder="닉네임 입력"><br><br>
 
-  <div id="game" style="display:none;">
-    <div id="playerInfo"></div>
-    <div id="playerList"><!-- 플레이어 리스트 + 점수 --></div>
-    <div id="hostControls" style="display:none;">
-      <button id="startBtn">게임 시작</button>
-    </div>
-    <div class="question" id="questionBox"></div>
-    <div id="timerDisplay">⏱ 준비 중...</div>
-    <input id="chatInput" placeholder="정답 입력" />
-    <button id="sendAnswerBtn">전송</button>
+  <button id="createRoomBtn">방 만들기</button>
+  <button id="joinRandomBtn">랜덤 방 입장</button><br><br>
 
-    <div id="chatBox">
-      <div id="chatMessages"></div>
-      <button id="scrollToBottomBtn" style="display: none; position: absolute; bottom: 20px; right: 20px; z-index: 10;">
-        ▼
-      </button>
-    </div>
-  </div>
+  <input type="text" id="roomCodeInput" placeholder="방 코드 입력">
+  <button id="joinBtn">코드로 입장</button>
 
-  <script src="script.js"></script>
-  <script>
-    const chatInput = document.getElementById('chatInput');
-
-    chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault(); // 줄바꿈 방지
-
-        const message = chatInput.value.trim();
-        if (message !== "") {
-          socket.send(JSON.stringify({
-            type: 'chat',
-            payload: { text: message }
-          }));
-        }
-
-        chatInput.value = "";        // 입력창 비우기
-        chatInput.focus();           // 다시 포커스 주기
-      }
-    });
-  </script>
+  <script src="./js/index.js"></script>
 </body>
 
 </html>
