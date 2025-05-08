@@ -20,6 +20,12 @@ module.exports = function socketHandler(ws, wss) {
         const { type, payload } = data;
 
         switch (type) {
+            case 'create_room':
+                handleCreateRoom(ws, payload);
+                break;
+            case 'join_random':
+                handleJoinRandom(ws, payload);
+                break;
             case 'join_room':
                 handleJoinRoom(ws, payload);
                 break;
@@ -42,6 +48,26 @@ module.exports = function socketHandler(ws, wss) {
     });
 };
 
+function handleCreateRoom(ws, payload) {
+    const code = generateUniqueRoomCode();
+    ws.roomId = code;
+    if (!rooms[code]) rooms[code] = new RoomManager(code);
+    rooms[code].addPlayer(ws, payload.name);
+}
+function handleJoinRandom(ws, payload) {
+    const available = Object.entries(rooms).find(([id, room]) => room.players.length < 8);
+    if (available) {
+        const [roomId, room] = available;
+        ws.roomId = roomId;
+        room.addPlayer(ws, payload.name);
+    } else {
+        // 방이 없으면 새로 생성
+        const newCode = generateUniqueRoomCode();
+        ws.roomId = newCode;
+        rooms[newCode] = new RoomManager(newCode);
+        rooms[newCode].addPlayer(ws, payload.name);
+    }
+}
 function handleJoinRoom(ws, payload) {
     if (!payload) return;
 
@@ -54,12 +80,12 @@ function handleJoinRoom(ws, payload) {
 
     const room = rooms[roomId];
     ws.roomId = roomId;
-    
+
     room.addPlayer(ws, name); // 이 시점에 ws.id가 이미 설정되어 있어야 함
 
     room.broadcastPlayerList();
 }
-async function handleChat(ws, payload)  {
+async function handleChat(ws, payload) {
     const text = payload?.text?.trim();
     if (!text) return;
 
@@ -67,18 +93,18 @@ async function handleChat(ws, payload)  {
     const game = room?.game;
     const playerInfo = room.playersById.get(ws.id);
     const playerName = playerInfo?.name || '익명';
-  
+
     if (game && !game.answered) {
-      const isCorrect = await game.checkAnswer(ws, text);
-      if (isCorrect) return; // 정답이면 여기서 처리 끝
+        const isCorrect = await game.checkAnswer(ws, text);
+        if (isCorrect) return; // 정답이면 여기서 처리 끝
     }
-  
+
     // ❗ 틀렸거나 아직 정답 아님 → 그냥 채팅으로 broadcast
     room.broadcast('chat_message', {
-      sender: playerName,
-      message: text
+        sender: playerName,
+        message: text
     });
-  }
+}
 function handleStartGame(ws) {
     const room = rooms[ws.roomId];
     if (!room || !room.isHost(ws)) return;
@@ -103,4 +129,14 @@ function handleDisconnect(ws) {
     } else {
         room.broadcastPlayerList();
     }
+}
+
+// 코드 생성용
+function generateUniqueRoomCode(length = 5) {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < length; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
 }
