@@ -41,6 +41,15 @@ app.post('/admin/insert-quiz', async (req, res) => {
   }
 });
 
+app.get('/admin/quizzes', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM quizzes ORDER BY id DESC LIMIT 100');
+    res.json(rows);
+  } catch (err) {
+    console.error('문제 목록 조회 오류:', err);
+    res.status(500).json({ error: 'DB 조회 실패' });
+  }
+});
 // WebSocket 연결 시 처리
 wss.on('connection', (ws) => {
   socketHandler(ws, wss);
