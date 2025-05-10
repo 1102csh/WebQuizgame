@@ -28,3 +28,10 @@ button {
 button:hover{
     background-color: darkcyan;
 }
+.quiz-item {
+    background: #f9f9f9;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
